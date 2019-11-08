@@ -6,6 +6,8 @@ https://time.geekbang.org/column/article/10192
 
 通常可以把 JVM 内存区域分为下面几个方面，其中，有的区域是以线程为单位，而有的区域则是整个 JVM 进程唯一的。
 
+![jvm内存划分](./image/jvm内存划分.png)
+
 ## 程序计数器
 
 第一，程序计数器（PC，Program Counter Register）。在 JVM 规范中，每个线程都有它自己的程序计数器，并且任何时间一个线程都只有一个方法在执行，也就是所谓的当前方法。程序计数器会存储当前线程正在执行的 Java 方法的 JVM 指令地址；或者，如果是在执行本地方法，则是未指定值（undefined）。
@@ -37,8 +39,6 @@ https://time.geekbang.org/column/article/10192
 ## 本地方法栈
 
 第六，本地方法栈（Native Method Stack）。它和 Java 虚拟机栈是非常相似的，支持对本地方法的调用，也是每个线程都会创建一个。在 Oracle Hotspot JVM 中，本地方法栈和 Java 虚拟机栈是在同一块儿区域，这完全取决于技术实现的决定，并未在规范中强制。
-
-![jvm内存划分](H:\Adata\gitHubWorkspace\interviewQuestion\Java相关\jvm\image\jvm内存划分.png)
 
 程序计数器、本地方法栈和虚拟机栈是线程私有的。方法区也叫做永久代，不过jdk8中将永久代移除了。
 

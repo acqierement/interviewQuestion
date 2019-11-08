@@ -49,7 +49,7 @@ JVM 会随意选取一个 Survivor 区域作为“to”，然后会在 GC 过程
 
 Hotspot JVM 还有一个概念叫做 Thread Local Allocation Buffer（TLAB），这是 JVM 为每个线程分配的一个私有缓存区域。从内存模型而不是垃圾收集的角度，对 Eden 区域继续进行划分，否则，多线程同时分配内存时，为避免操作同一地址，可能需要使用加锁等机制，进而影响分配速度。线程维护两个指针，一个指向TLAB的空闲位置，另一个指向TLAB的结尾。
 
-![TLAB示意图](H:\Adata\gitHubWorkspace\interviewQuestion\Java相关\jvm\image\TLAB.png)
+![TLAB示意图](.\image\TLAB.png)
 
 2. 老年代
 
@@ -129,11 +129,11 @@ G1 GC 仍然存在着年代的概念，但是其内存结构并不是简单的�
 
 G1 吞吐量和停顿表现都非常不错，并且仍然在不断地完善，与此同时 CMS 已经在 JDK 9 中被标记为废弃（deprecated），所以 G1 GC 值得你深入掌握。
 
-![垃圾收集器](H:\Adata\gitHubWorkspace\interviewQuestion\Java相关\jvm\image\垃圾收集器.png)
+![垃圾收集器](.\image\垃圾收集器.png)
 
 
 
-总结：
+## 总结
 
 serial是串行，其余都是并发的
 
