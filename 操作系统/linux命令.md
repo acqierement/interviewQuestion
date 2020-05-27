@@ -48,3 +48,4 @@ root:x:0:0:root:/root:/bin/bash
 operator:x:11:0:operator:/root:/sbin/nologin
 ```
 
+##  awk命令的应用
