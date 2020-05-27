@@ -12,11 +12,13 @@ synchronize  https://www.cnblogs.com/dolphin0520/p/3923737.html
 
 lock https://www.cnblogs.com/dolphin0520/p/3923167.html
 
+## volatile
+
 volatile 是java的一个关键字，只能修饰变量。它保证了变量的可见性，但是不能保证原子性。是一种比synchronize更轻量级的同步机制。
 
 volatile修饰的变量不会进行重排序。
 
-
+## synchronize
 
 synchronize可以修饰方法和代码块。是一个重入锁，而且是非公平锁。具有可见性和原子性
 
