@@ -4,15 +4,17 @@
 
 ### map了解吗，说说hashmap，hashtable，treemap
 
-关于null值，只有HashMap支持null的key和value。
+**关于null值**
+
+只有HashMap支持null的key和value。
 
 TreeMap支持null的value。因为要对key做比较，所以key不能为null。
 
 HashTable对null的value做了限制，对key会获取key的hashcode，所以null的key会报错。
 
+**线程安全**
 
-
-
+HashTable是线程安全的，相关操作的方法都加了synchronized。
 
 hashmap1.8阈值为什么是8
 
