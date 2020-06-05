@@ -10,7 +10,7 @@
 
 TreeMap支持null的value。因为要对key做比较，所以key不能为null。
 
-HashTable对null的value做了限制，对key会获取key的hashcode，所以null的key会报错。
+HashTable 不支持null的key和value。对null的value做了限制，对key会获取key的hashcode，所以null的key会报错。
 
 **线程安全**
 
@@ -86,7 +86,37 @@ hashmap需要存4个数，那么最少需要几个空间，从装载因子方面
 
 ### ArrayList和LinkedList的实现与区别
 
-LinkedList是单向链表还是双向链表
+ArrayList底层是Object[]数组，每次扩容时增加一半
+
+```java
+int newCapacity = oldCapacity + (oldCapacity >> 1);
+```
+
+移动数组元素是使用System.arraycopy来操作的。
+
+
+
+**LinkedList是单向链表还是双向链表**
+
+LinkedList底层的数据结构是这样的
+
+```java
+    private static class Node<E> {
+        E item;
+        Node<E> next;
+        Node<E> prev;
+
+        Node(Node<E> prev, E element, Node<E> next) {
+            this.item = element;
+            this.next = next;
+            this.prev = prev;
+        }
+    }
+```
+
+可以看到是一个双向链表。插入数据就是一个双向链表的插入操作，没什么特别的。
+
+
 
 ## Set集合
 
