@@ -82,6 +82,8 @@ hash方法为什么高16异或低16
 
 hashmap需要存4个数，那么最少需要几个空间，从装载因子方面答
 
+
+
 ## List集合
 
 ### ArrayList和LinkedList的实现与区别
