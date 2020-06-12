@@ -36,8 +36,6 @@ Java 7及以前是数组+链表、Java 8及以后是数组+链表+红黑树、Ja
 - `Collections.synchronizedMap`方法，使用装饰者模式来给`get`和`put`等方法加上`synchronized`语句块，由于即使不考虑`Hashtable`的线程安全开销，`Hashtable`的实现性能也低于`HashMap`，因此使用此方法装饰`HashMap`会比直接使用`Hashtable`更为高效
 - `ConcurrentHashMap`是`java.util.concurrent`包里的线程安全`Map`，Java 7及以前为分段+数组+链表，在每个段中使用可重入锁；Java 8为数组+链表+红黑树，在数组的每个位置使用CAS来进行轻量级锁
 
-
-
 ### ConcurrentHashMap
 
 扩容？
@@ -60,11 +58,11 @@ HashMap的底层实现
 
 如果你4G的内存，让你设计一个Map存入数据，你会从哪几方面考虑
 
- 	 HashMap resize()过程能否介绍 ？   
+HashMap resize()过程能否介绍 ？   
 
- 	 HashMap效率受什么影响 (负载因子、hash数组size)？   
+HashMap效率受什么影响 (负载因子、hash数组size)？   
 
- 	 HashMap中扰动函数的作用 ？
+HashMap中扰动函数的作用 ？
 
 负载因子过大，过小会怎么样？
 
@@ -80,9 +78,7 @@ hash方法为什么高16异或低16
 
 为什么1.8引入红黑树，为什么阈值是8，红黑树的特点，时间复杂度，与其他数据结构的比较，为什么每次扩容二倍
 
-hashmap需要存4个数，那么最少需要几个空间，从装载因子方面答
-
-
+hashmap需要存4个数，那么最少需要几个空间，从装载因子方面
 
 ## List集合
 
@@ -180,6 +176,8 @@ getHoldCount
 
 ### 运行时异常和非运行时异常
 
+
+
 RuntimeException Exception Error
 
 ### java哪些异常类需要try  catch   手动捕获
@@ -193,6 +191,16 @@ RuntimeException Exception Error
 ### serializable关键字的作用（实现原理）
 
 ### 集中序列化协议,pb的优点
+
+Protobuf 是 Google 公司内部的混合语言数据标准，是一种轻便、高效的结构化数据存储格式，可以用于结构化数据序列化，支持 Java、Python、C++、Go 等语言。Protobuf使用的时候需要定义 IDL（Interface description language），然后使用不同语言的 IDL编译器，生成序列化工具类，它的优点是：
+
+- 序列化后体积相比 JSON、Hessian 小很多；
+
+- IDL 能清晰地描述语义，所以足以帮助并保证应用程序之间的类型不会丢失，无需类似XML 解析器；
+- 序列化反序列化速度很快，不需要通过反射获取类型；
+- 消息格式升级和兼容性不错，可以做到向后兼容。
+
+Protobuf 非常高效，但是对于具有反射和动态能力的语言来说，这样用起来很费劲，这一点就不如 Hessian
 
 ## 网络IO模型
 
@@ -390,7 +398,7 @@ Integer a = 1000; a++;几次拆箱和装箱
 
 
 
-### Java .class文件结构
+## Java .class文件结构
 
 能问这个我是真没想到，还好之前看过的还没完全忘掉。推荐《深入理解JVM虚拟机》，class文件头两个字节是0xCAFEBABE固定的，然后是支持的最低虚拟机版本，然后是常量池，字符串之类的。。。然后是访问标志位，比如是否public是否static，然后是属性和方法的定义，不过当时这部分没看了，用不上。  
 

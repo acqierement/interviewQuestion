@@ -353,6 +353,8 @@ private void rehash(HashEntry<K,V> node) {
 
 那么，再来看看size是怎么操作的？
 
+### size()
+
 ```java
     final long sumCount() {
         CounterCell[] as = counterCells; CounterCell a;
