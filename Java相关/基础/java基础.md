@@ -324,13 +324,19 @@ Java 8 增加了函数式编程的支持，所以又增加了一类定义，即�
 
 **继承**是代码复用的基础机制，类似于我们对于马、白马、黑马的归纳总结。但要注意，继承可以看作是非常紧耦合的一种关系，父类代码修改，子类行为也会变动。在实践中，过度滥用继承，可能会起到反效果。
 
-**多态**，你可能立即会想到重写（override）和重载（overload）、向上转型。简单说，重写是父子类中相同名字和参数的方法，不同的实现；重载则是相同名字的方法，但是不同的参数，
+**多态**，你可能立即会想到重写（override）和重载（overload）、向上转型。简单说，重写是父子类中相同名字和参数的方法，不同的实现；重载则是相同名字的方法，但是不同的参数
 
 ##  Object的方法 
 
  { finalize 、 clone、 getClass 、 equals 、 hashCode 、toString、notify、notifyAll、wait}
 
-## int的长度
+### lock，notify，等为什么要放在根类下面呢
+
+使用这些方法必须标识同步所属的锁；
+
+锁可以是任意对象，所以任意对象调用方法一定定义在Object类中。
+
+## 基本数据类型，int的长度
 
 byte：一个字节（8位）（-128~127）（-2的7次方到2的7次方-1）
 
@@ -396,21 +402,19 @@ Integer a = 1000; a++;几次拆箱和装箱
 
 final 修饰的 class 代表不可以继承扩展，final 的变量是不可以修改的，而 final 的方法也是不可以重写的（override）。
 
-## 不变类
+## 不变类（immutable）
 
    不要提供任何可以修改对象属性的方法  
 
-   不要为属性提供set方法  
+将 class 自身声明为 final，这样别人就不能扩展来绕过限制了。
 
-   保证类不会被扩展  
+将所有成员变量定义为 private 和 final，并且不要实现 setter 方法。
 
-   用final修饰类  
+通常构造对象时，成员变量使用深度拷贝来初始化，而不是直接赋值，这是一种防御措施，因为你无法确定输入对象不被其他人修改。
 
-   使所有的属性都是final的  
+如果确实需要实现 getter 方法，或者其他可能会返回内部状态的方法，使用 copy-on-write 原则，创建私有的 copy
 
    初始化之后不能修改属性的值  
-
-   使所有的属性都是private的  
 
    防止别的对象访问不可变类的属性  
 
@@ -438,17 +442,64 @@ final 修饰的 class 代表不可以继承扩展，final 的变量是不可以�
 
 单继承结构使垃圾收集器的实现变得容易多了，由于所有的对象都保证具有其类型信息，因此不会因无法确定对象的类型而陷入僵局。
 
-## lock，notify，等为什么要放在根类下面呢
-
 ## java8中接口中有默认实现的方法，为什么呢
 
 主要是增加 Lambda、Stream 相关的功能
 
+因为如果想给相关的接口添加新的方法的话，会影响到所有现有的实现，所以增加了一个默认方法，用来解决接口的修改和现有的实现不兼容的问题。
+
 ## java8新添了什么新的东西
+
+1. 接口的默认实现方法
+2. Lambda 表达式
+3. 函数式接口
+4. Java 8 引入了流式操作（Stream）
+5. Java 8 允许你使用 :: 关键字来传递方法或者构造函数引用
+6. Java 8 在包java.time下包含了一组全新的时间日期API
+7. 在Java 8中支持多重注解了，只需要给该注解标注一下@Repeatable即可。
+
+主要问了流Stream
 
 ## servlet你描述一下
 
-## final ，finalize，finnaly的区别，是不是不可以改的，怎么可以改，
+Java Servlet 是运行在 Web 服务器或应用服务器上的程序，它是作为来自 Web 浏览器或其他 HTTP 客户端的请求和 HTTP 服务器上的数据库或应用程序之间的中间层。
+
+### 生命周期
+
+**init() 方法**
+
+init 方法被设计成只调用一次。它在第一次创建 Servlet 时被调用，在后续每次用户请求时不再调用。因此，它是用于一次性初始化，就像 Applet 的 init 方法一样。
+
+**service() 方法**
+
+service() 方法是执行实际任务的主要方法。Servlet 容器（即 Web 服务器）调用 service() 方法来处理来自客户端（浏览器）的请求，并把格式化的响应写回给客户端。
+
+每次服务器接收到一个 Servlet 请求时，服务器会产生一个新的线程并调用服务。service() 方法检查 HTTP 请求类型（GET、POST、PUT、DELETE 等），并在适当的时候调用 doGet、doPost、doPut，doDelete 等方法。
+
+## final ，finalize，finnaly的区别，是不是不可以改的，怎么可以改
+
+final 可以用来修饰类、方法、变量，分别有不同的意义，final 修饰的 class 代表不可以继承扩展，final 的变量是不可以修改的，而 final 的方法也是不可以重写的（override）。
+
+finally 则是 Java 保证重点代码一定要被执行的一种机制。我们可以使用 try-finally 或者 try-catch-finally 来进行类似关闭 JDBC 连接、保证 unlock 锁等动作。
+
+finalize 是基础类 java.lang.Object 的一个方法，它的设计目的是保证对象在被垃圾收集前完成特定资源的回收。finalize 机制现在已经不推荐使用，并且在 JDK 9 开始被标记为 deprecated。
+
+finally有一个特例
+
+```java
+try {
+  // do something
+  System.exit(1);
+} finally{
+  System.out.println(“Print from finally”);
+}
+```
+
+这个例子finally是不会被执行的，这是一个特例
+
+3.有什么机制可以替换 finalize 吗？
+
+Java 平台目前在逐步使用 java.lang.ref.Cleaner 来替换掉原有的 finalize 实现。Cleaner 的实现利用了幻象引用（PhantomReference）
 
 ## 并发包类
 
@@ -462,15 +513,11 @@ final 修饰的 class 代表不可以继承扩展，final 的变量是不可以�
 
 ## 注解的使用
 
-## 基本数据类型
-
 ## 
 
 ## Java的aop的实现原理,两种代理机制的差别（实现原理）
 
 ## 
-
-## JDK1.8新特性，主要问了流Stream
 
 ## maven的scope有几种
 
@@ -497,10 +544,6 @@ final 修饰的 class 代表不可以继承扩展，final 的变量是不可以�
 ## 阿里有个证书，可以了解一下
 
 ## Java的缺点，跟c++和c比？
-
-## final关键字
-
-## 
 
 ## 一段代码,判断为什么会产生OOM异常
 
