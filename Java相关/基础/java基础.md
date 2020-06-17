@@ -230,7 +230,53 @@ hash值相等，而两个对象不一定equals
 
 ## String StringBuffer StringBuilder  区别 和各自使用场景,实现
 
-深入一些 ： String 是如何实现它不可变的？ 为什么要设置String为不可变对象  ?     (字节一面这个问题给我问懵了)
+### 缓存
+
+**Java 的字符串池属于 JVM 专门给指定的特殊内存区域，用来存储字符串字面量。**
+
+一般使用 Java 6 这种历史版本，并不推荐大量使用 intern，为什么呢？魔鬼存在于细节中，被缓存的字符串是存在所谓 PermGen 里的，也就是臭名昭著的“永久代”，这个空间是很有限的，也基本不会被 FullGC 之外的垃圾收集照顾到。所以，如果使用不当，OOM 就会光顾。
+
+而 Java7 之后字符串池被移至堆内存进行管理，这样的好处就是允许被 JVM 进行垃圾回收操作，将未被引用的字符串所占内存即使回收，以此节省内存。
+
+甚至永久代在 JDK 8 中被 MetaSpace（元数据区）替代了。而且，默认缓存大小也在不断地扩大中，从最初的 1009，到 7u40 以后被修改为 60013。
+
+### 底层优化
+
+```java
+
+public class StringConcat {
+     public static String concat(String str) {
+       return str + “aa” + “bb”;
+     }
+}
+```
+
+反编译结果：
+
+```java
+
+         0: new           #2                  // class java/lang/StringBuilder
+         3: dup
+         4: invokespecial #3                  // Method java/lang/StringBuilder."<init>":()V
+         7: aload_0
+         8: invokevirtual #4                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+        11: ldc           #5                  // String aa
+        13: invokevirtual #4                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+        16: ldc           #6                  // String bb
+        18: invokevirtual #4                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+        21: invokevirtual #7                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+```
+
+可以看到，非静态的拼接逻辑在 JDK 8 中会自动被 javac 转换为 StringBuilder 操作。
+
+但是如果在循环体中，会生成多个StringBuilder对象，所以循环体中，最好还是自己创建一个StringBuilder对象
+
+**深入一些 ： String 是如何实现它不可变的？ 为什么要设置String为不可变对象  ?     (字节一面这个问题给我问懵了)**
+
+在多线程中，只有不变的对象和值是线程安全的，可以在多个线程中共享数据。由于 String 天然的不可变，当一个线程”修改“了字符串的值，只会产生一个新的字符串对象，不会对其他线程的访问产生副作用，访问的都是同样的字符串数据，不需要任何同步操作。
+
+**安全性**
+由于字符串无论在任何 Java 系统中都广泛使用，会用来存储敏感信息，如账号，密码，网络路径，文件处理等场景里，保证字符串 String 类的安全性就尤为重要了，如果字符串是可变的，容易被篡改，那我们就无法保证使用字符串进行操作时，它是安全的，很有可能出现 SQL 注入，访问危险文件等操作。
 
 StringBuilder为什么快
 
@@ -263,6 +309,14 @@ Java 8 增加了函数式编程的支持，所以又增加了一类定义，即�
 最常用的地方就是构造器的重载。
 
 ## 深拷贝和浅拷贝区别
+
+深拷贝和浅拷贝最根本的区别在于是否真正获取一个对象的复制实体，而不是引用。
+
+假设B复制了A，修改A的时候，看B是否发生变化：
+
+如果B跟着**也变了**，说明是浅拷贝，拿人手短！（修改堆内存中的同一个值）
+
+如果B**没有改变**，说明是深拷贝，自食其力！（修改堆内存中的不同的值）
 
 ## 说一下你理解的封装，继承和多态
 
@@ -339,6 +393,8 @@ Integer a = 1000; a++;几次拆箱和装箱
 和int类似
 
 ## final关键字修饰类，方法等的限制
+
+final 修饰的 class 代表不可以继承扩展，final 的变量是不可以修改的，而 final 的方法也是不可以重写的（override）。
 
 ## 不变类
 
