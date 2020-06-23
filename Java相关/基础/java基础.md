@@ -690,13 +690,43 @@ Java的反射就是利用加载到jvm中的.class文件来进行操作的。.cla
 
 ## jdk9或10有了解吗
 
+### JDK9新特性
+
+#### modularity System 模块系统
+
+#### HTTP/2
+
+#### JShell
+
+#### 不可变集合工厂方法
+
+Java 9增加了List.of()、Set.of()、Map.of()和Map.ofEntries()等工厂方法来创建不可变集合.
+
+#### String 存储结构变更
+
+JDK9之前String底层使用char数组存储数据private final char value[]，JDK9将String底层存储数据改为byte数组存储数据private final byte[] value。
+
+### JDK10新特性
+
+#### 并行Full GC 的G1
+
 ## Rest成熟度模型
 
 ## Java线程间的通信
 
-## Java .class文件结构
+一、概述
 
-能问这个我是真没想到，还好之前看过的还没完全忘掉。推荐《深入理解JVM虚拟机》，class文件头两个字节是0xCAFEBABE固定的，然后是支持的最低虚拟机版本，然后是常量池，字符串之类的。。。然后是访问标志位，比如是否public是否static，然后是属性和方法的定义，不过当时这部分没看了，用不上。  
+二、wait/notify 机制
+
+三、Condition
+
+四、生产者/消费者模式
+
+五、线程间的通信——管道
+
+六、方法Join的使用
 
 ## 能不能自己实现一个java.lang.String并加载
+
+
 
