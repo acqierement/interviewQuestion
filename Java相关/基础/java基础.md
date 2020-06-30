@@ -114,6 +114,20 @@ LinkedList底层的数据结构是这样的
 
 可以看到是一个双向链表。插入数据就是一个双向链表的插入操作，没什么特别的。
 
+```java
+    void linkLast(E e) {
+        final Node<E> l = last;
+        final Node<E> newNode = new Node<>(l, e, null);
+        last = newNode;
+        if (l == null)
+            first = newNode;
+        else
+            l.next = newNode;
+        size++;
+        modCount++;
+    }
+```
+
 
 
 ## Set集合
@@ -136,6 +150,8 @@ MD5、SHA-1、SHA-256
 
 ### TreeSet和HashSet区别
 
+HashSet底层是用HashMap,TreeSet底层是用treeMap。
+
 ## 队列
 
 ### 队列呢，了解什么
@@ -146,7 +162,7 @@ ArrayBlockQueue，LinkedBlockingQueue
 
 ### queue里面都有什么方法
 
-offer，add，put
+add，offer，remove, poll, element,peek
 
 ### synchroBlockQueue 到底可以存几个
 
@@ -175,8 +191,6 @@ getHoldCount
 ## 异常
 
 ### 运行时异常和非运行时异常
-
-
 
 RuntimeException Exception Error
 
