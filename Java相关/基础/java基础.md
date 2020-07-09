@@ -176,6 +176,10 @@ add，offer，remove, poll, element,peek
 
 有sychronized、为什么引入ReenTrantLock
 
+#### 说说synchronize和lock区别
+
+我：synchronized是java内置锁，不需要手动的解锁，支持可重入，但是非公平，不可中断，条件单一，在1.6之前性能较差，经过1.6优化只有性能有显著的提升。lock，基于AQS，拿reentrant为例，需要手动解锁，可重入，支持中断，支持多条件，支持超时操作。(来快问我synchronized底层和1.6做了什么优化，我来从monitor对象开始说到字节码到monitorenter和monitorexit再到mutex，从偏向锁到轻量级锁到重量级锁，我再说个逃逸分析、锁消除、锁粗化。再引申出个JMM，来个cpu缓存L1、L2、L3到MESI，我还可以给你来个cpu缓存行伪共享问题。什么你问的是锁为什么重？那就来上下文切换，内核态用户态，系统调用，再给你引到上一个mq话题，搞个mmap、sendfile零拷贝，扯一波pageCache、内存预分配、文件预热、mlock等。来啊！！！
+
 ### 锁用过没
 
 叭叭各种锁
