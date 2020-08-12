@@ -58,7 +58,11 @@ classA里有个methodA和methodB，methodA调用了methodB，methodB有切面，
 
 ## spring bean的生命周期
 
+
+
 ## spring的循环依赖
+
+> 具体可以看本目录下的spring的循环依赖
 
 对于构造器注入，在getSingleton()方法中会调用beforeSingletonCreation()方法去做检查，在这里出现异常报错。
 
