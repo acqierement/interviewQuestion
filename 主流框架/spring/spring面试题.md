@@ -44,21 +44,13 @@ Spring 4.x开始，Spring MVC基于Servlet 3.0 开发，并且为了方便Restfu
 
 Spring5 的基准版本为8。支持响应式编程支持。增加函数式web框架，该框架引入了两个基本组件：HandlerFunction 和 RouterFunction。
 
-## aop
-
-### 知道反射么，aop拦截点东西用反射怎么搞的。反射都可以得到哪些内容，链接java8新内容
-
-### springaop，怎么实现，写一个静态代理和动态代理的代码
-
-### AOP的失效问题？
-
-classA里有个methodA和methodB，methodA调用了methodB，methodB有切面，ClassB去new一个ClassA  a,去调用a.methodA,那切面还会在吗？
-
 ## spring中bean的加载过程
+
+> 具体可以看本目录下的`spring中bean的加载过程`
 
 ## spring bean的生命周期
 
-
+> 具体可以看本目录下的`spring bean的生命周期`
 
 ## spring的循环依赖
 
@@ -80,8 +72,18 @@ private final Set<String> singletonsCurrentlyInCreation =      Collections.newSe
 
 ```java
 /** Names of beans that are currently in creation */
-private final ThreadLocal<Object> prototypesCurrentlyInCreation =      new NamedThreadLocal<>("Prototype beans currently in creation");
+private final ThreadLocal<Object> prototypesCurrentlyInCreation = new NamedThreadLocal<>("Prototype beans currently in creation");
 ```
+
+## aop
+
+### 知道反射么，aop拦截点东西用反射怎么搞的。反射都可以得到哪些内容，链接java8新内容
+
+### springaop，怎么实现，写一个静态代理和动态代理的代码
+
+### AOP的失效问题？
+
+classA里有个methodA和methodB，methodA调用了methodB，methodB有切面，ClassB去new一个ClassA  a,去调用a.methodA,那切面还会在吗？
 
 ## 事务
 
@@ -115,13 +117,17 @@ TCC分布式事务，try、commit、cancel，利用补偿机制和幂等性解�
 
 那这个事务和数据库的事务有什么关联
 
-## 讲了一下Spring全家桶，比如AOP、IoC等特性和实现，
+## 讲了一下Spring全家桶，比如AOP、IoC等特性和实现
 
 ## SpringMVC和Spring父子容器的关系
+
+[spring与springmvc父子容器](http://www.tianshouzhi.com/api/tutorials/spring)
 
 ## JDK动态代理 与 CGLib动态代理
 
 ## 针对spring框架中bean的生命周期，如何不使用spring配置生命周期的功能，完成每个request与session都是单例的情况（利用反射生成匿名类）
+
+不知道
 
 ## ASM怎么实现cglib
 
@@ -129,7 +135,62 @@ TCC分布式事务，try、commit、cancel，利用补偿机制和幂等性解�
 
 ## 基于spring的应用，我想让这个程序启动之后，然后再打印一个log，或者一个定时任务，这个怎么实现
 
-## AOP 两种***的区别，什么时候用
+实现ApplicationListener
+
+```java
+@Component
+public class ApplicationStartQuartzJobListener implements ApplicationListener<ContextRefreshedEvent>{
+ 
+	@Autowired
+    private QuartzManager quartzManager;
+ 
+    /**
+     * 初始启动quartz
+     */
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        try {
+        	quartzManager.start();
+            System.out.println("任务已经启动...");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+springboot的话还可以实现CommandLineRunner，ApplicationRunner 
+
+**CommandLineRunner**
+
+```java
+@Component
+public class StartPingService implements CommandLineRunner{
+ 
+	@Autowired
+	Ping ping;
+	
+	@Override
+	public void run(String... args) throws Exception {
+		// TODO Auto-generated method stub
+		ping.pingStart();
+	}
+ 
+}
+```
+
+**ApplicationRunner** 
+
+```java
+@Component
+public class JDDRunner implements ApplicationRunner {
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        System.out.println(args);
+        System.out.println("这个是测试ApplicationRunner接口");
+    }
+}
+```
 
 ## 介绍MVC设计模式
 
@@ -139,7 +200,7 @@ TCC分布式事务，try、commit、cancel，利用补偿机制和幂等性解�
 
 ## beanfactorypostprocessor
 
-## 对AplicationContextAware的了解
+## 对ApplicationContextAware的了解
 
 ## spring mvc 和Servet的关系
 
@@ -147,15 +208,9 @@ TCC分布式事务，try、commit、cancel，利用补偿机制和幂等性解�
 
 （根据源码说了三种，单例，策略，工厂）
 
-## Spring中加载流程
-
-循环依赖怎么解决
-
 ## Spring的IOC，自己实现呢
 
 ## Spring的bean初始化流程，源码都有什么接口
-
-## 三级缓存解决循环依赖
 
 ## Spring中Bean创建中可能出现的冲突问题Spring是如何解决的
 
