@@ -48,6 +48,8 @@ Spring5 的基准版本为8。支持响应式编程支持。增加函数式web�
 
 > 具体可以看本目录下的`spring中bean的加载过程`
 
+### Spring的bean初始化流程，源码都有什么接口
+
 ## spring bean的生命周期
 
 > 具体可以看本目录下的`spring bean的生命周期`
@@ -125,13 +127,9 @@ TCC分布式事务，try、commit、cancel，利用补偿机制和幂等性解�
 
 ## JDK动态代理 与 CGLib动态代理
 
-## 针对spring框架中bean的生命周期，如何不使用spring配置生命周期的功能，完成每个request与session都是单例的情况（利用反射生成匿名类）
-
-不知道
-
-## ASM怎么实现cglib
-
 ## spring的生命周期，不是bean
+
+> 具体可以看本目录下的spring启动流程
 
 ## 基于spring的应用，我想让这个程序启动之后，然后再打印一个log，或者一个定时任务，这个怎么实现
 
@@ -196,23 +194,33 @@ public class JDDRunner implements ApplicationRunner {
 
 ##  IOC的流程
 
-## spring中哪里用到了工厂模式
+自己实现呢？
 
-## beanfactorypostprocessor
+## BeanFactoryPostProcessor
+
+里面定义了一个接口
+
+```java
+	void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException;
+```
+
+可以对beanFactory的数据进行修改
 
 ## 对ApplicationContextAware的了解
 
-## spring mvc 和Servet的关系
+Aware就是意识到，感知到的意思。ApplicationContextAware表示实现这个接口就可以得到ApplicationContext。
 
-## Spring 中的设计模式吗
+那什么时候去调用这个方法呢？
+
+在初始化的时候，也就是在initializeBean()方法中会调用invokeAwareMethods(beanName, bean)方法，去调用各个aware的方法。
+
+## spring mvc 和servlet的关系
+
+## Spring 中的设计模式
+
+### spring中哪里用到了工厂模式
 
 （根据源码说了三种，单例，策略，工厂）
-
-## Spring的IOC，自己实现呢
-
-## Spring的bean初始化流程，源码都有什么接口
-
-## Spring中Bean创建中可能出现的冲突问题Spring是如何解决的
 
 # SpringBoot
 
@@ -268,3 +276,10 @@ public class JDDRunner implements ApplicationRunner {
 
 ## 
 
+## 针对spring框架中bean的生命周期，如何不使用spring配置生命周期的功能，完成每个request与session都是单例的情况（利用反射生成匿名类）
+
+不知道
+
+## ASM怎么实现cglib
+
+不知道
