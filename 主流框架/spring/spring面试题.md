@@ -81,15 +81,54 @@ private final ThreadLocal<Object> prototypesCurrentlyInCreation = new NamedThrea
 
 ### 知道反射么，aop拦截点东西用反射怎么搞的。反射都可以得到哪些内容，链接java8新内容
 
+通过java 反射技术，可以获取很多信息：
+
+1.类名
+
+2.属性，属性名
+
+3.方法，方法名
+
+4.注解
+
 ### springaop，怎么实现，写一个静态代理和动态代理的代码
 
 ### AOP的失效问题？
 
 classA里有个methodA和methodB，methodA调用了methodB，methodB有切面，ClassB去new一个ClassA  a,去调用a.methodA,那切面还会在吗？
 
+因为不是通过代理类去调用，所以aop失效
+
 ## 事务
 
-### 事务传播级别
+### 事务五个事务隔离级别
+
+默认
+
+读未提交
+
+读已提交
+
+可重复读
+
+串行
+
+### 事务的传播机制？
+
+PROPAGATION_REQUIRED --支持当前事务，如果当前没有事务，就新建一个事务。这是最常见的选择。
+
+PROPAGATION_SUPPORTS--支持当前事务，如果当前没有事务，就以非事务方式执行。
+
+PROPAGATION_MANDATORY--支持当前事务，如果当前没有事务，就抛出异常。
+
+PROPAGATION_REQUIRES_NEW--新建事务，如果当前存在事务，把当前事务挂起。
+
+PROPAGATION_NOT_SUPPORTED--以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。 
+
+PROPAGATION_NEVER--以非事务方式执行，如果当前存在事务，则抛出异常。
+
+PROPAGATION_NESTED -- 理解Nested的关键是savepoint。他与PROPAGATION_REQUIRES_NEW的区别是，PROPAGATION_REQUIRES_NEW另起一个事务，将会与他的父事务相互独立，而Nested的事务和他的父事务是相依的，他的提交是要等和他的父事务一块提交的。也就是说，如果父事务最后回滚，他也要回滚的。
+而Nested事务的好处是他有一个savepoint。
 
 ### Spring如何使用事务？Spring的事务是怎么管理的
 
@@ -99,9 +138,6 @@ Spring的事务实现方式
 
 事务的注意事项？
 `public`方法、自调用无效、回滚一致性、异常处理机制
-
-事务的传播机制？
-七种传播机制
 
 什么时候会触发异常回滚？
 事务方法抛出`RuntimeException`
