@@ -46,7 +46,7 @@ beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, this);
 
 真正的实例化：
 
-```
+```java
 
 if(!bd.hasMethodOverrides()){
 	// 如果没有方法重写，通过构造函数使用反射来实例化对象

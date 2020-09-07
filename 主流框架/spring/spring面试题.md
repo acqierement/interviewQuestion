@@ -311,8 +311,6 @@ Aware就是意识到，感知到的意思。ApplicationContextAware表示实现�
 
 ## Spring Boot的配置特性
 
-
-
 ## SpringBoot，spring，springmvc三者关系
 
 ### SpringBoot 和 SpringMVC 的区别
@@ -343,7 +341,39 @@ Aware就是意识到，感知到的意思。ApplicationContextAware表示实现�
 
 ## springboot的优点
 
+Spring Boot 的最大的优势是“约定优于配置“。“约定优于配置“是一种软件设计范式，开发人员按照约定的方式来进行编程，可以减少软件开发人员需做决定的数量，获得简单的好处，而又不失灵活性。
+
+内嵌tomcat，不需要部署war文件
+
+提供start来简化搭建配置
+
+不需要代码生成，也不需要xml配置
+
 ## 如何自定义实现SpringBoot中的starter
+
+建一个starter工程
+
+定义一个配置类
+
+```java
+package com.spring.study;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
+
+@Component
+@ComponentScan("com.spring.study.module")
+public class HelloServiceAutoConfiguration {
+}
+```
+
+在META-INF/spring.factories中配置这个类
+
+```java
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.spring.study.HelloServiceAutoConfiguration
+```
+
+然后引入这个工程就可以使用工程中定义的bean了
 
 ## SpringBoot 核心框架包含什么？
 

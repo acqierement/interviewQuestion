@@ -34,3 +34,6 @@
 * [:art: 闲谈](#art-闲谈)
 * [:envelope: 说明](#envelope-说明)
 
+推荐一个博主，里面有挺多面试题的
+
+[Java架构师追风](https://yq.aliyun.com/users/jffq542wfqpmk?spm=a2c4e.11153940.0.0.32e8281aUQbHvi)

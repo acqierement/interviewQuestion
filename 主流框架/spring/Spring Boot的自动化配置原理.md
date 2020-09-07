@@ -4,7 +4,7 @@
 
 先简单说一下启动的过程，从run开始。
 
-```
+```java
 context = createApplicationContext();
 prepareContext(context, environment, listeners, applicationArguments, printedBanner);
 refreshContext(context);
@@ -46,7 +46,7 @@ protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, A
 
 loadFactoryNames里面最后有这么一个语句：
 
-```
+```java
 			Enumeration<URL> urls = (classLoader != null ?
 					classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
@@ -66,13 +66,11 @@ loadFactoryNames里面最后有这么一个语句：
 ((AbstractApplicationContext) applicationContext).refresh();
 ```
 
-最后还是调用AbstractApplicationContext的refresh方法。
+所以最后还是调用AbstractApplicationContext的refresh方法。
 
 在invokeBeanFactoryPostProcessors里面的invokeBeanDefinitionRegistryPostProcessors()方法会分别调用后置处理器的postProcessBeanDefinitionRegistry方法。
 
-其中有ConfigurationClassPostProcessor这个后置处理器。
-
-该后置处理器里面的postProcessBeanDefinitionRegistry方法，会调用ConfigurationClassParser.parse方法，
+其中有ConfigurationClassPostProcessor这个后置处理器。该类实现了BeanDefinitionRegistryPostProcessor这个接口，所以就会执行postProcessBeanDefinitionRegistry方法，该方法里面调用了ConfigurationClassParser.parse方法，
 
 传入的参数类型是多个BeanDefinitionHolder，就包括启动类的BeanDefinitionHolder。
 
@@ -98,13 +96,21 @@ loadFactoryNames里面最后有这么一个语句：
 
 启动类会进到第一个if
 
-```
+```java
 parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 ```
 
-对注解进行解析
+入参包括类的注解，对注解进行解析
 
-processConfigurationClass方法
+这边会去递归地解析注解
+
+```java
+	protected final void parse(AnnotationMetadata metadata, String beanName) throws IOException {
+		processConfigurationClass(new ConfigurationClass(metadata, beanName));
+	}
+```
+
+processConfigurationClass方法中：
 
 sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 
@@ -112,95 +118,19 @@ sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 	protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass)
 			throws IOException {
 
-		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
-			// Recursively process any member (nested) classes first
-			processMemberClasses(configClass, sourceClass);
-		}
-
-		// Process any @PropertySource annotations
-		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
-				sourceClass.getMetadata(), PropertySources.class,
-				org.springframework.context.annotation.PropertySource.class)) {
-			if (this.environment instanceof ConfigurableEnvironment) {
-				processPropertySource(propertySource);
-			}
-			else {
-				logger.info("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() +
-						"]. Reason: Environment must implement ConfigurableEnvironment");
-			}
-		}
-
-		// Process any @ComponentScan annotations
-		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
-				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
-		if (!componentScans.isEmpty() &&
-				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
-			for (AnnotationAttributes componentScan : componentScans) {
-				// The config class is annotated with @ComponentScan -> perform the scan immediately
-				Set<BeanDefinitionHolder> scannedBeanDefinitions =
-						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
-				// Check the set of scanned definitions for any further config classes and parse recursively if needed
-				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
-					if (bdCand == null) {
-						bdCand = holder.getBeanDefinition();
-					}
-					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
-						parse(bdCand.getBeanClassName(), holder.getBeanName());
-					}
-				}
-			}
-		}
-
 		// Process any @Import annotations
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
-
-		// Process any @ImportResource annotations
-		AnnotationAttributes importResource =
-				AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
-		if (importResource != null) {
-			String[] resources = importResource.getStringArray("locations");
-			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
-			for (String resource : resources) {
-				String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
-				configClass.addImportedResource(resolvedResource, readerClass);
-			}
-		}
-
-		// Process individual @Bean methods
-		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
-		for (MethodMetadata methodMetadata : beanMethods) {
-			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
-		}
-
-		// Process default methods on interfaces
-		processInterfaces(configClass, sourceClass);
-
-		// Process superclass, if any
-		if (sourceClass.getMetadata().hasSuperClass()) {
-			String superclass = sourceClass.getMetadata().getSuperClassName();
-			if (superclass != null && !superclass.startsWith("java") &&
-					!this.knownSuperclasses.containsKey(superclass)) {
-				this.knownSuperclasses.put(superclass, configClass);
-				// Superclass found, return its annotation metadata and recurse
-				return sourceClass.getSuperClass();
-			}
-		}
-
+        
 		// No superclass -> processing is complete
 		return null;
 	}
 ```
 
-processImports方法，getImports方法获取到@import的值，其中就包括AutoConfigurationImportSelector类
-
-```java
-processImports(configClass, sourceClass, getImports(sourceClass), true);
-```
+这里的getImports方法其实就是递归地去获取@Import的值。其中就有AutoConfigurationImportSelector类
 
 processImports里面有
 
-```
+```java
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
@@ -211,7 +141,15 @@ processImports里面有
 						}
 ```
 
-最后进入到process方法
+这里如果是DeferredImportSelector的子类，会执行handle方法
+
+```java
+this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
+```
+
+这里面会把AutoConfigurationImportSelector类加入到deferredImportSelectorHandler中。
+
+然后调用前面parse方法里面的this.deferredImportSelectorHandler.process();
 
 ```java
 		public void process() {
@@ -232,3 +170,26 @@ processImports里面有
 
 	}
 ```
+
+deferredImports.forEach(handler::register)里面会将AutoConfigurationImportSelector加入到this.groupings中
+
+然后执行后面的handler.processGroupImports()方法
+
+```java
+		public void processGroupImports() {
+			for (DeferredImportSelectorGrouping grouping : this.groupings.values()) {
+				grouping.getImports().forEach(entry -> {
+					ConfigurationClass configurationClass = this.configurationClasses.get(
+							entry.getMetadata());
+
+						processImports(configurationClass, asSourceClass(configurationClass),
+								asSourceClasses(entry.getImportClassName()), false);
+
+				});
+			}
+		}
+```
+
+这里遍历了this.groupings的每个类，通过getImprots方法获取配置信息，这里就回到了AutoConfigurationImportSelector的getImports()方法。
+
+这样我们就完成了springboot获取配置文件的分析。
