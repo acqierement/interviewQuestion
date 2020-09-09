@@ -21,9 +21,9 @@ public class SynchronizedDemo {
 
 可以看到代码前后有一个**monitorenter**和一个**monitorexit**
 
-**monitorenter**：每个对象都是一个监视器锁（monitor）。当monitor被占用时就会处于锁定状态，线程执行monitorenter指令时尝试获取monitor的所有权，过程如下：
+**monitorenter**：每个对象都有一个监视器锁（monitor）。当monitor被占用时就会处于锁定状态，线程执行monitorenter指令时尝试获取monitor的所有权，过程如下：
 
-> 1. 如果monitor的进入数为0，则该线程进入monitor，然后将进入数设置为1，该线程即为monitor的所有者；
+> 1. 如果monitor的进入数为0，则该线程成为该monitor的所有者，然后将monitor的进入数设置为1；
 > 2. 如果线程已经占有该monitor，只是重新进入，则进入monitor的进入数加1；
 > 3. 如果其他线程已经占用了monitor，则该线程进入阻塞状态，直到monitor的进入数为0，再重新尝试获取monitor的所有权；
 
@@ -57,7 +57,7 @@ public class SynchronizedMethod {
 
 ## 对象的存储结构
 
-刚才提到了Java对象的对象头Mark Word会存放Monitor对象的引用地址，这个Mark Word是什么东西？
+Java对象的对象头Mark Word会存放Monitor对象的引用地址，这个Mark Word是什么东西？
 
 在JVM中**，对象在内存中的布局分为三块区域：对象头、实例数据和对齐填充。**如下图所示：
 

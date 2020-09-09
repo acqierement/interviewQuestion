@@ -172,6 +172,12 @@ public boolean isInterrupted()
 
 ## 第三章 线程间通信
 
+### 3.1.3 wait()
+
+wait的作用是使当前执行代码的线程进行等待，wait()方法是Object类的方法。
+
+在调用wait()之前，线程必须获得该对象的对象级别锁，即只能在同步方法和同步代码块中调用wait()方法。在执行wait()方法后，当前线程释放锁。如果调用wait()方法时没有持有适当的锁，则抛出IllegalMonitorStateException异常，该异常是RuntimeException的子类，所以不需要显式捕获。
+
 ## 第四章 lock的使用
 
 ## 第五章 定时器timer
