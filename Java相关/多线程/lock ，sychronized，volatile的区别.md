@@ -46,15 +46,19 @@ Lock和synchronize作用类似，但是lock可以实现更多的功能。lock要
 
 　　总结来说，Lock和synchronized有以下几点不同：
 
-　　1）Lock是一个接口，而synchronized是Java中的关键字，synchronized是内置的语言实现；
+  1. Lock是一个接口，而synchronized是Java中的关键字，synchronized是内置的语言实现；
 
-　　2）synchronized在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能造成死锁现象，因此使用Lock时需要在finally块中释放锁；
+  2. synchronize是一个重入锁，而且是非公平锁，lock可以设置是否公平。
 
-　　3）Lock可以让等待锁的线程响应中断，而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够响应中断；
+  3. synchronized在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能造成死锁现象，因此使用Lock时需要在finally块中释放锁；
 
-　　4）通过Lock可以知道有没有成功获取锁，而synchronized却无法办到。
+  4. Lock有tryLock方法，可以让等待锁的线程响应中断，而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够响应中断；
 
-　　5）Lock可以提高多个线程进行读操作的效率。(存疑)
+  5. 通过Lock的tryLock可以知道有没有成功获取锁，而synchronized却无法办到。
+
+     > 在高版本JDK中，已经对synchronized进行了优化，synchronized和Lock方式在性能方面差别已不太明显
+
+
 
 
 
