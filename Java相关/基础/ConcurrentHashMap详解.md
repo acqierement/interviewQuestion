@@ -135,11 +135,31 @@ final V put(K key, int hash, V value, boolean onlyIfAbsent) {
                 for (HashEntry<K,V> e = first;;) {
                     if (e != null) {
                         K k;
-                        // 更新已有value...
+                        if ((k = e.key) == key ||
+                            (e.hash == hash && key.equals(k))) {
+                            oldValue = e.value;
+                            if (!onlyIfAbsent) {
+                                e.value = value;
+                                ++modCount;
+                            }
+                            break;
+                        }
+                        e = e.next;
                     }
                     else {
-                        // 放置HashEntry到特定位置，如果超过阈值，进行rehash
-                        // ...
+                        if (node != null)
+                            node.setNext(first);
+                        else
+                            node = new HashEntry<K,V>(hash, key, value, first);
+                        int c = count + 1;
+                        if (c > threshold && tab.length < MAXIMUM_CAPACITY)
+                            rehash(node);
+                        else
+                            setEntryAt(tab, index, node);
+                        ++modCount;
+                        count = c;
+                        oldValue = null;
+                        break;
                     }
                 }
             } finally {
@@ -149,6 +169,8 @@ final V put(K key, int hash, V value, boolean onlyIfAbsent) {
         }
 
 ```
+
+尝试获取锁失败的话，会去执行scanAndLockForPut。该方法会自旋去查找是否有相同的节点，没有的话，就返回创建的新节点。
 
 ### size()
 
@@ -355,6 +377,29 @@ private void rehash(HashEntry<K,V> node) {
 
 ### size()
 
+在put的代码中，在值放入进去后，会调用方法addCount(1L, binCount)，增加数量
+
+JDK 8 推荐使用mappingCount 方法，因为这个方法的返回值是 long 类型，不会因为 size 方法是 int 类型限制最大值。
+
+```java
+public long mappingCount() {
+    long n = sumCount();
+    return (n < 0L) ? 0L : n; // ignore transient negative values
+}
+```
+
+size()
+
+```java
+public int size() {
+    long n = sumCount();
+    return ((n < 0L) ? 0 :
+           (n > (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int)n);
+}
+```
+
+**sumCount**
+
 ```java
     final long sumCount() {
         CounterCell[] as = counterCells; CounterCell a;
@@ -464,6 +509,7 @@ private void rehash(HashEntry<K,V> node) {
                                 hn = lastRun;
                                 ln = null;
                             }
+                             //使用高位和低位两条链表进行迁移，使用头插法拼接链表
                             for (Node<K,V> p = f; p != lastRun; p = p.next) {
                                 int ph = p.hash; K pk = p.key; V pv = p.val;
                                 if ((ph & n) == 0)
@@ -488,4 +534,4 @@ private void rehash(HashEntry<K,V> node) {
 
 ```
 
-核心逻辑和HashMap一样也是创建两个链表，只是多了获取lastRun的操作。
+核心逻辑和HashMap一样也是创建两个链表，通过两个链表区分。
