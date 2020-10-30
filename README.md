@@ -1,14 +1,18 @@
 # interviewQuestion
 记录一些面试问题，也算是自己的知识总结
 
+已整理内容
 
+java相关下的基础、jvm、多线程
+
+主流框架spring
 
 ## 目录
 
 * [:coffee: Java](#coffee-java)
   * [Java/J2EE 基础](#javaj2ee-基础)
   * [Java 集合框架](#java-集合框架)
-  * [Java 多线程](#java-多线程)
+  * [Java 多线程](#java-多线程) 
   * [Java BIO,NIO,AIO](#java-bionioaio)
   * [Java 虚拟机 jvm](#java-虚拟机-jvm)
   * [设计模式](#设计模式)
