@@ -154,7 +154,7 @@ PROPAGATION_NESTED -- 理解Nested的关键是savepoint。他与PROPAGATION_REQU
 
 #### @Transactional实现原理
 
-
+#### spring事务传播行为怎么实现
 
 #### 事务的注意事项？
 
@@ -201,6 +201,12 @@ TCC分布式事务，try、commit、cancel，利用补偿机制和幂等性解�
 ## SpringMVC和Spring父子容器的关系
 
 [spring与springmvc父子容器](http://www.tianshouzhi.com/api/tutorials/spring)
+
+## Springmvc在哪里处理异常
+
+## 发出一个url请求服务器怎么接收和处理
+
+http请求到达api的映射问题
 
 ## JDK动态代理 与 CGLib动态代理
 

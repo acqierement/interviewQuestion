@@ -1,18 +1,18 @@
 # MySQL
 
-## MySQL的存储引擎，两种的区别
-
-是否支持行锁 、 是否支持事务 、 是否支持 MVCC 、 底层索引结构不同
+## MySQL的存储引擎
 
 ### mysql存储引擎都有啥？
 
 命令 show ENGINES可以查看所有的存储引擎。
 
-![1604028443590](MySQL面试题/1604028443590.png)
+![1604028443590](./1604028443590.png)
 
 常用的存储引擎包括InnoDB、MyISAM、Memory等
 
 ###  InnoDB和MyISAM都是什么？
+
+是否支持行锁 、 是否支持事务 、 是否支持 MVCC 、 底层索引结构不同
 
 二者区别
 
@@ -113,9 +113,65 @@ B+树有子节点用链表连起来，支持范围查找。
 
 ### 普通索引什么情况下失效
 
-对索引字段进行操作时，包括隐式转化或者使用函数
+**对索引字段做函数操作**
 
-最左前缀原则，如果like ‘张%’则可以用到索引，如果是 like ‘%张’则没法用到索引。联合索引也是遵循最左前缀原则。
+```sql
+select count(*) from tradelog where month(t_modified)=7;
+```
+
+**隐式类型转换**
+
+```sql
+select * from tradelog where tradeid=110717;
+```
+
+tradeid的数据类型是varchar。
+
+对于优化器来说，这个语句相当于：
+
+```sql
+select * from tradelog where  CAST(tradid AS signed int) = 110717;
+```
+
+所以其实是第一条规则相同，对索引字段做函数操作。
+
+**隐式字符编码转换**
+
+```sql
+select d.* from tradelog l, trade_detail d where d.tradeid=l.tradeid and l.id=2;
+```
+
+如果l表的字符集是utf8，d表字符集是utf8mb4，字符集utf8mb4是utf8的超集，所以当这两个类型的字符串在做比较的时候，MySQL内部的操作是，先把utf8字符串转成utf8mb4字符集，再做比较。
+
+等同于
+
+```sql
+select * from trade_detail  where CONVERT(traideid USING utf8mb4)=l.tradeid and l.id=2;
+```
+
+可以看到也是对字段进行了函数操作。
+
+解决方法除了修改字符集让二者一致之外，还可以改写语句：
+
+```sql
+ select d.* from tradelog l , trade_detail d where d.tradeid=CONVERT(l.tradeid USING utf8) and l.id=2; 
+```
+
+可以看到，这里的CONVERT函数是加在输入参数上的，所以就不会有问题了。
+
+三个例子，其实是在说同一件事儿，即：**对索引字段做函数操作，可能会破坏索引值的有序性，因此优化器就决定放弃走树搜索功能。**
+
+MySQL的优化器确实有“偷懒”的嫌疑，即使简单地把where id+1=1000改写成where id=1000-1就能够用上索引快速查找，也不会主动做这个语句重写。
+
+**最左前缀原则**
+
+如果like ‘张%’则可以用到索引，如果是 like ‘%张’则没法用到索引。联合索引也是遵循最左前缀原则。
+
+**innodb如果有or的话不会走索引**
+
+组合索引是a，b   where a = 1 ,b = 2 OR b =3 走索引吗？不走
+
+可以使用union，或者用in
 
 ### 其他
 
@@ -165,7 +221,7 @@ B+树有子节点用链表连起来，支持范围查找。
 
 根据最左前缀原则，如果有（a,b）的联合索引，会根据a进行查找，就没必要单独建一个a了。所以要根据实际情况选择合适的顺序。
 
-### 组合索引是a，b   where a = 1 ,b = 2 OR b =3 走索引吗？
+### 
 
 ## MySQL中的事务隔离级别
 
@@ -239,17 +295,51 @@ oracle读已提交，innodb默认可重复读。
 
 ## sql语句的执行流程
 
+客户端 连接器 分析器 优化器 执行器 存储引擎
+
+> 可以查看该目录下面的《MySQL语句的执行流程》
+
+### 一条mysql查询经历了什么
+
+### 一条mysql更新经历了什么？
+
 ## 优化
 
 ### 如何查看慢查询
 
+修改配置文件：
+
+MySQL在Windows系统中的配置文件一般是是my.ini找到[mysqld]下面加上
+
+![img](20180921145213710.png)
+
+log-slow-queries是慢查询的文件路径，long_query_time是超过指定时间的查询会被记录到日志中。
+
 ### 怎么解决慢查询
 
-### mysql读的很慢的原因怎么查询（慢查询日志和expalin）
+在MySQL中，会引发性能问题的慢查询，大体有以下三种可能：
 
-### 如何查看SQL语句的每一个查询计划，就是每一步消化多少毫秒
+1. 索引没有设计好；
+2. SQL语句没写好；
+3. MySQL选错了索引。
 
-### 你自己还可以讲一下其他SQL语句优化
+**索引没有设计好**，这种场景一般就是通过紧急创建索引来解决。
+
+**SQL语句没写好**可以通过改写SQL语句来处理。
+
+MySQL 5.7提供了query_rewrite功能，可以把输入的一种语句改写成另外一种模式。
+
+```sql
+mysql> insert into query_rewrite.rewrite_rules(pattern, replacement, pattern_database) values ("select * from t where id + 1 = ?", "select * from t where id = ? - 1", "db1");
+
+call query_rewrite.flush_rewrite_rules();
+```
+
+**MySQL选错了索引。**
+
+这时候，应急方案就是给这个语句加上force index。
+
+同样地，使用查询重写功能，给原来的语句加上force index，也可以解决这个问题。
 
 ### mysql如何性能调优？比较缓慢的话，从哪个方面优化？
 
@@ -257,7 +347,11 @@ oracle读已提交，innodb默认可重复读。
 
 讲了一下索引的优化，最左匹配原则、索引失效情况和索引区分度
 
-## explain中 rows type key extra字段的含义？
+### explain中rows type key extra字段的含义？
+
+参考
+
+[mysql explain详解](https://blog.csdn.net/weixin_43094917/article/details/104071048?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522160523226719725266919757%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=160523226719725266919757&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_v1~rank_blog_v1-1-104071048.pc_v1_rank_blog_v1&utm_term=explain&spm=1018.2118.3001.4450)
 
 ## count(1) count(*) count(列值)的区别
 
@@ -282,15 +376,33 @@ count(*)、count(主键id)和count(1) 都表示返回满足条件的结果集的
 
 按照效率排序的话，count(字段)<count(主键id)<count(1)≈count(*)，所以我建议你，尽量使用count(\*)。
 
-## 连接池是怎么回事，ajax干什么的
+## 连接池是怎么回事
+
+官方：数据库连接池（Connection pooling）是程序启动时建立足够的数据库连接，并将这些连接组成一个连接池，由程序动态地对连接池中的连接进行申请，使用，释放。
+
+传统链接：一般来说，JAVA应用程序访问数据库的过程：
+
+1） 装载数据库驱动程序；
+
+2） 通过JDBC建立数据库连接；
+
+3） 访问数据库，执行SQL语句；
+
+4） 断开数据库连接；
+
+使用了数据库连接池的机制：
+
+1） 程序初始化时创建连接池；
+
+2） 使用时向数据库申请可用连接；
+
+3） 使用完毕，将连接返回给连接池；
+
+4） 程序退出时，断开所有连接，并释放资源；
 
 ## mysql一级缓存二级缓存
 
 ## 数据库几大范式
-
-## 一条mysql查询经历了什么
-
-## 一条mysql更新经历了什么？
 
 ## 一致性视图
 
@@ -342,6 +454,8 @@ count(*)、count(主键id)和count(1) 都表示返回满足条件的结果集的
 
 ## 数据库分库分表
 
+ 分库分表的规则，分表之后的分页查询 排序查询如何实现
+
 ## 什么时候是行锁，什么时候是表锁？
 
 ## 数据库如何实现回滚到一天前？
@@ -378,3 +492,4 @@ count(*)、count(主键id)和count(1) 都表示返回满足条件的结果集的
 
 ##  MySQL集群。假如集群出现延迟怎么处理。
 
+## 主从同步过程
