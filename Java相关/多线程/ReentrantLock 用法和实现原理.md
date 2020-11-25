@@ -87,7 +87,7 @@ final void lock() {
         }
 ```
 
-前半部分又再检查了一次State是否变成0了，也就是锁是否被释放了，如果被释放了，就获取锁。若不为0，则判读一下是否是被自己占用，如果是的话，就更新state的值，表示重入的次数。
+前半部分又再检查了一次State是否变成0了，也就是锁是否被释放了，如果被释放了，就获取锁。若不为0，则判读一下是否是被自己占用，如果是的话，也可以获取锁，然后更新state的值，表示重入的次数。
 
 如果tryAcquire(arg)为false的话，表示获取锁不成功。那么就要将线程入队。
 
@@ -105,7 +105,6 @@ final void lock() {
             }
         }
         // 如果尾巴为null，就初始化节点
-    
         enq(node);
         return node;
     }
@@ -167,7 +166,7 @@ final boolean acquireQueued(final Node node, int arg) {
 
 **shouldParkAfterFailedAcquire**
 
-```
+```java
     private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
         int ws = pred.waitStatus;
         // 前驱节点状态为signal,返回true
@@ -322,7 +321,7 @@ final boolean acquireQueued(final Node node, int arg) {
     }
 ```
 
-oAcquireNanos的流程简述为：线程先入等待队列，然后开始自旋，尝试获取锁，获取成功就返回，失败则在队列里找一个安全点把自己挂起直到超时时间过期。
+doAcquireNanos的流程简述为：线程先入等待队列，然后开始自旋，尝试获取锁，获取成功就返回，失败则在队列里找一个安全点把自己挂起直到超时时间过期。
 
 这里为什么还需要循环呢？因为当前线程节点的前驱状态可能不是SIGNAL，那么在当前这一轮循环中线程不会被挂起，然后更新超时时间，开始新一轮的尝试。
 
