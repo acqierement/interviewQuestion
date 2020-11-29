@@ -6,41 +6,30 @@
 
 **关于null值**
 
-只有HashMap支持null的key和value。
+`Hashtable`和`ConcurrentHashMap`的key和value不能为null。
 
-TreeMap支持null的value。因为要对key做比较，所以key不能为null。
+`TreeMap`的key不能为null。
 
-HashTable 不支持null的key和value。对null的value做了限制，对key会获取key的hashcode，所以null的key会报错。
+> TreeMap支持null的value。因为要对key做比较，所以key不能为null。
+>
+> HashTable 不支持null的key和value。对null的value做了限制，对key会获取key的hashcode，所以null的key会报错。
+>
 
 **线程安全**
 
 HashTable是线程安全的，相关操作的方法都加了synchronized。
 
-hashmap1.8阈值为什么是8
-
 Hashtable 和 HashMap的区别 ： { 底层数据结构 (JDK1.8后不同)、父类不同  、扩容方法不同 、 线程上锁范围不同（重点） 红黑树区别，有序无序}
 
 区别，性能，原理，hashmap为什么不安全，举例子，jdk1.7，jdk1.8区别；
 
-哪些集合可以存放`null`？上述集合除了`Hashtable`和`ConcurrentHashMap`都可以。
-
-哪些集合可以存放重复的元素？`Set`不能重复，`Map`的`key`不能重复。
-
-hashmap：
-
-Java 7及以前是数组+链表、Java 8及以后是数组+链表+红黑树、Java 8红黑树转变的条件、如何减少hash碰撞、数组的大小和如何用位运算代替取模、Java 7多线程扩容死循环问题、Java 8扩容时如何减少移动提高性能  
+哪些集合可以存放null？
 
 ### `Hashtable`和`ConcurrentHashMap`差异？
 
-- Hashtable`是旧版本Java的遗留类，继承自另一个遗留类`Dictionary`，线程安全的实现方式为简单粗暴地给`get`和`put`等方法加上`synchronized`关键字
+- Hashtable是旧版本Java的遗留类，继承自另一个遗留类`Dictionary`，线程安全的实现方式为简单粗暴地给`get`和`put`等方法加上`synchronized`关键字
 - `Collections.synchronizedMap`方法，使用装饰者模式来给`get`和`put`等方法加上`synchronized`语句块，由于即使不考虑`Hashtable`的线程安全开销，`Hashtable`的实现性能也低于`HashMap`，因此使用此方法装饰`HashMap`会比直接使用`Hashtable`更为高效
 - `ConcurrentHashMap`是`java.util.concurrent`包里的线程安全`Map`，Java 7及以前为分段+数组+链表，在每个段中使用可重入锁；Java 8为数组+链表+红黑树，在数组的每个位置使用CAS来进行轻量级锁
-
-### ConcurrentHashMap
-
-扩容？
-
-put的源码
 
 ### HashMap & ConcurrentHashMap 的比较
 
@@ -51,6 +40,8 @@ CurconrentHashMap它的size()函数怎么保证返回正确值。是否有更好
 深入一些 ： HashMap 为什么线程不安全？ 能否举例 = { 并发resize()触发闭环结构 ，覆盖put操作 }
 
 ### HashMap
+
+Java 7及以前是数组+链表、Java 8及以后是数组+链表+红黑树、Java 8红黑树转变的条件、如何减少hash碰撞、数组的大小和如何用位运算代替取模、Java 7多线程扩容死循环问题、Java 8扩容时如何减少移动提高性能  
 
 HashMap的底层实现
 
@@ -92,8 +83,6 @@ int newCapacity = oldCapacity + (oldCapacity >> 1);
 
 移动数组元素是使用System.arraycopy来操作的。
 
-
-
 **LinkedList是单向链表还是双向链表**
 
 LinkedList底层的数据结构是这样的
@@ -128,11 +117,9 @@ LinkedList底层的数据结构是这样的
     }
 ```
 
-
-
 ## Set集合
 
-### Set 了解过吗？知道 add（） 会出什么问题吗？
+### Set 了解过吗？知道add()会出什么问题吗？
 
 这题就是判断你是否是背题，没看到源码的很难说出来）
 
@@ -165,32 +152,6 @@ ArrayBlockQueue，LinkedBlockingQueue
 add，offer，remove, poll, element,peek
 
 ### synchroBlockQueue 到底可以存几个
-
-## 锁
-
-### Synchronized
-
-#### Synchronized的原理
-
-#### sychronized、jdk1.6的优化，重量级锁自旋次数设置的参数
-
-有sychronized、为什么引入ReenTrantLock
-
-#### 说说synchronize和lock区别
-
-我：synchronized是java内置锁，不需要手动的解锁，支持可重入，但是非公平，不可中断，条件单一，在1.6之前性能较差，经过1.6优化只有性能有显著的提升。lock，基于AQS，拿reentrant为例，需要手动解锁，可重入，支持中断，支持多条件，支持超时操作。(来快问我synchronized底层和1.6做了什么优化，我来从monitor对象开始说到字节码到monitorenter和monitorexit再到mutex，从偏向锁到轻量级锁到重量级锁，我再说个逃逸分析、锁消除、锁粗化。再引申出个JMM，来个cpu缓存L1、L2、L3到MESI，我还可以给你来个cpu缓存行伪共享问题。什么你问的是锁为什么重？那就来上下文切换，内核态用户态，系统调用，再给你引到上一个mq话题，搞个mmap、sendfile零拷贝，扯一波pageCache、内存预分配、文件预热、mlock等。来啊！！！
-
-### 锁用过没
-
-叭叭各种锁
-
-### 锁的什么方法你用过
-
-tryLock
-
-getHoldCount
-
-### lock和tryLock区别
 
 ## 异常
 
@@ -694,12 +655,6 @@ Java的反射就是利用加载到jvm中的.class文件来进行操作的。.cla
 
 ## 
 
-## 水平触发和边缘触发的区别及各自的适用场景，
-
-## 
-
-## 
-
 ## 数组最大大小
 
 一是规范隐含的限制。Java数组的length必须是非负的int，所以它的理论最大值就是java.lang.Integer.MAX_VALUE = 2^31-1 = 2147483647。
@@ -743,8 +698,6 @@ JDK9之前String底层使用char数组存储数据private final char value[]，J
 五、线程间的通信——管道
 
 六、方法Join的使用
-
-## 能不能自己实现一个java.lang.String并加载
 
 
 

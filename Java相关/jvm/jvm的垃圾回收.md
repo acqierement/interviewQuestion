@@ -124,6 +124,18 @@ ParNew GC，很明显是个新生代 GC 实现，它实际是 Serial GC 的多�
 
 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC
 
+### Parrallel GC
+
+Parrallel GC，在早期 JDK 8 等版本中，它是 server 模式 JVM 的默认 GC 选择，也被称作是**吞吐量优先的 GC**。吞吐量就是cup运行用户代码的时间，吞吐量越大，表示运行用户代码的时间比例越多，gc占用的时间较少。它的算法和 Serial GC 比较相似，尽管实现要复杂的多，其特点是新生代和老年代 GC 都是并行进行的，在常见的服务器环境中更加高效。
+
+开启选项是：
+
+-XX:+UseParallelGC
+
+另外，Parallel GC 引入了开发者友好的配置项，我们可以直接设置暂停时间或吞吐量等目标，JVM 会自动进行适应性调整，例如下面参数：
+
+-XX:MaxGCPauseMillis=value-XX:GCTimeRatio=N // GC 时间和用户时间比例 = 1 / (N+1)
+
 ### CMS
 
 CMS（Concurrent Mark Sweep） GC，基于标记 - 清除（Mark-Sweep）算法，设计目标是尽量减少停顿时间，这一点对于 Web 等反应时间敏感的应用非常重要，一直到今天，仍然有很多系统使用 CMS GC。
@@ -148,18 +160,6 @@ CMS整个过程可以细分为五个步骤：
 
 初始标记、重新标记这两个步骤仍然需要“Stop The World”。所以可以看到，初始标记、重新标记只有CMS自己的线程，没有用户线程。
 
-### Parrallel GC
-
-Parrallel GC，在早期 JDK 8 等版本中，它是 server 模式 JVM 的默认 GC 选择，也被称作是吞吐量优先的 GC。吞吐量就是cup运行用户代码的时间，吞吐量越大，表示运行用户代码的时间比例越多，gc占用的时间较少。它的算法和 Serial GC 比较相似，尽管实现要复杂的多，其特点是新生代和老年代 GC 都是并行进行的，在常见的服务器环境中更加高效。
-
-开启选项是：
-
--XX:+UseParallelGC
-
-另外，Parallel GC 引入了开发者友好的配置项，我们可以直接设置暂停时间或吞吐量等目标，JVM 会自动进行适应性调整，例如下面参数：
-
--XX:MaxGCPauseMillis=value-XX:GCTimeRatio=N // GC 时间和用户时间比例 = 1 / (N+1)
-
 ### G1 GC
 
 G1 GC 这是一种兼顾吞吐量和停顿时间的 GC 实现，是 Oracle JDK 9 以后的默认 GC 选项。G1 可以直观的设定停顿时间的目标，相比于 CMS GC，G1 未必能做到 CMS 在最好情况下的延时停顿，但是最差情况要好很多。
@@ -180,7 +180,7 @@ CMS 已经在 JDK 9 中被标记为废弃（deprecated），所以 G1 GC 值得�
 - 并发标记（Concurrent Marking）：从GC Root开始对堆中对象进行可达性分析，递归扫描整个堆
   里的对象图，找出要回收的对象，这阶段耗时较长，但可与用户程序并发执行。当对象图扫描完成以
   后，还要重新处理SATB（原始快照）记录下的在并发时有引用变动的对象。
-  ·最终标记（Final Marking）：对用户线程做另一个短暂的暂停，用于处理并发阶段结束后仍遗留
+- 最终标记（Final Marking）：对用户线程做另一个短暂的暂停，用于处理并发阶段结束后仍遗留
   下来的最后那少量的SATB记录。
 - 筛选回收（Live Data Counting and Evacuation）：负责更新Region的统计数据，对各个Region的回
   收价值和成本进行排序，根据用户所期望的停顿时间来制定回收计划，可以自由选择任意多个Region

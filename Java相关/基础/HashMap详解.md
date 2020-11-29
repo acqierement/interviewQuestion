@@ -2,6 +2,8 @@
 
 ## 1.7的HashMap
 
+### 数据结构
+
 首先来看一下它的数据结构
 
 ```java
@@ -35,6 +37,8 @@ Entry的属性是这样的
 想象一下put的过程，放进一个数的时候，根据hash值找到对应的数组下标位置，该下标的单元格放的是一个链表，我们在该链表上面加上一个节点。就完成了一个put操作。
 
 具体来看一下源码是怎么实现的。
+
+### put
 
 **put()**
 
@@ -541,4 +545,48 @@ hash值的计算很简单，就是用hashCode的高16位和低16位异或。
     }
 ```
 
+### 红黑树
+
+```java
+    static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
+        TreeNode<K,V> parent;  // red-black tree links
+        TreeNode<K,V> left;
+        TreeNode<K,V> right;
+        TreeNode<K,V> prev;    // needed to unlink next upon deletion
+        boolean red;
+        TreeNode(int hash, K key, V val, Node<K,V> next) {
+            super(hash, key, val, next);
+        }
+	}
+```
+
+可以看到继承的是LinkedHashMap.Entry，其实最后也是继承HashMap.Node
+
+```java
+/**
+ * HashMap.Node subclass for normal LinkedHashMap entries.
+ */
+static class Entry<K,V> extends HashMap.Node<K,V> {
+    Entry<K,V> before, after;
+    Entry(int hash, K key, V value, Node<K,V> next) {
+        super(hash, key, value, next);
+    }
+}
+```
+
+**红黑树的特性**:
+
+1. 每个节点或者是黑色，或者是红色。
+2. 根节点是黑色。
+3. 每个叶子节点（NIL）是黑色。 **[注意：这里叶子节点，是指为空(NIL或NULL)的叶子节点！]**
+4. 如果一个节点是红色的，则它的子节点必须是黑色的。
+5. 从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
+
+特性(5)，确保没有一条路径会比其他路径长出俩倍。因而，红黑树是相对是接近平衡的二叉树。
+
+那为什么不使用平衡二叉树呢？AVL树是**严格的平衡二叉树**，只要不满足条件，就要通过旋转来保持平衡。
+
+红黑树的定义比较宽泛一些，所以需要旋转的情况少一点。平衡二叉树只适合查询多的情况，红黑树适合修改多的情况。
+
 1.7和1.8的区别总结可以看我的另一篇文章[HashMap在jdk1.7和1.8中的区别](https://blog.csdn.net/weixin_43094917/article/details/106427528)
+

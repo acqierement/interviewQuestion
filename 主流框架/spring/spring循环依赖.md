@@ -110,7 +110,7 @@ private final ThreadLocal<Object> prototypesCurrentlyInCreation =      new Named
 
 对于设置值的方式，我们可以使用property的方式来看一下。
 
-```
+```xml
 
 	<beans>
 		<bean id="circleB" class="org.springframework.CircleB" scope="prototype">
@@ -122,7 +122,7 @@ private final ThreadLocal<Object> prototypesCurrentlyInCreation =      new Named
 	</beans>
 ```
 
-在doCreateBean的时候，实例化完成之后，会去调用populateBean()去填充属性，对于我们这种配置方式，回去调用applyPropertyValues方法，来完成属性的填充，由于我们属性是通过“ref”指向另一个bean，所以会去调用beanFactory.getBean(refName)去获取引用的bean，这个过程会去递归调用doGetBean去生成相关的bean，所以就会在prototypesCurrentlyInCreation加入值，之后发现重复就会产生报错。
+在doCreateBean的时候，实例化完成之后，会去调用populateBean()去填充属性，对于我们这种配置方式，会去调用applyPropertyValues方法，来完成属性的填充，由于我们属性是通过“ref”指向另一个bean，所以会去调用beanFactory.getBean(refName)去获取引用的bean，这个过程会去递归调用doGetBean去生成相关的bean，所以就会在prototypesCurrentlyInCreation加入值，之后发现重复就会产生报错。
 
 ## 单例设置值循环依赖解决方案
 

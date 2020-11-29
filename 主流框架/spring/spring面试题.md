@@ -4,7 +4,7 @@
 
 ### BeanFactory
 
-BeanFactory，以Factory结尾，表示它是一个工厂类(接口)， **它负责生产和管理bean的一个工厂**。在Spring中，**BeanFactory是IOC容器的核心接口，它的职责包括：实例化、定位、配置应用程序中的对象及建立这些对象间的依赖。BeanFactory只是个接口，并不是IOC容器的具体实现，但是Spring容器给出了很多种实现，如 DefaultListableBeanFactory、XmlBeanFactory、ApplicationContext等，其中****XmlBeanFactory就是常用的一个，该实现将以XML方式描述组成应用的对象及对象间的依赖关系**。XmlBeanFactory类将持有此XML配置元数据，并用它来构建一个完全可配置的系统或应用。   
+BeanFactory，以Factory结尾，表示它是一个工厂类(接口)， **它负责生产和管理bean的一个工厂**。在Spring中，**BeanFactory是IOC容器的核心接口，它的职责包括：实例化、定位、配置应用程序中的对象及建立这些对象间的依赖。BeanFactory只是个接口，并不是IOC容器的具体实现，但是Spring容器给出了很多种实现，如 DefaultListableBeanFactory、XmlBeanFactory、ApplicationContext等**，其中XmlBeanFactory就是常用的一个，该实现将以XML方式描述组成应用的对象及对象间的依赖关系。XmlBeanFactory类将持有此XML配置元数据，并用它来构建一个完全可配置的系统或应用。   
 
 ### FactoryBean
 
@@ -97,20 +97,6 @@ classA里有个methodA和methodB，methodA调用了methodB，methodB有切面，
 
 因为不是通过代理类去调用，所以aop失效
 
-## 事务
-
-### 事务五个事务隔离级别
-
-默认
-
-读未提交
-
-读已提交
-
-可重复读
-
-串行
-
 ### 事务的传播机制？
 
 PROPAGATION_REQUIRED --支持当前事务，如果当前没有事务，就新建一个事务。这是最常见的选择。
@@ -191,8 +177,6 @@ return null;}
 TCC分布式事务，try、commit、cancel，利用补偿机制和幂等性解决事务一致性问题
 
 #### Spring的事务是怎么管理的？
-
-
 
 
 

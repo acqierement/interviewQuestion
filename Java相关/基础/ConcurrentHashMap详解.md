@@ -66,7 +66,7 @@ static final class Segment<K,V> extends ReentrantLock implements Serializable {
 
 所以ConcurrentHashMap的数据结构差不多是下图这种样子的。
 
-![数据结构](C:\Users\EDZ\AppData\Roaming\Typora\typora-user-images\1591060799397.png)
+![数据结构](ConcurrentHashMap详解/5220087-8c5b0cc951e61398.png)
 
 在构造的时候，Segment 的数量由所谓的 concurrentcyLevel 决定，默认是 16，也可以在相应构造函数直接指定。注意，Java 需要它是 2 的幂数值，如果输入是类似 15 这种非幂值，会被自动调整到 16 之类 2 的幂数值。
 
@@ -295,7 +295,6 @@ private void rehash(HashEntry<K,V> node) {
 ### put()
 
 ```java
-
     final V putVal(K key, V value, boolean onlyIfAbsent) {
         if (key == null || value == null) throw new NullPointerException();
         int hash = spread(key.hashCode());
