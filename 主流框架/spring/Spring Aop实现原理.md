@@ -28,7 +28,6 @@ getAdvicesAndAdvisorsForBean方法中的findEligibleAdvisors方法。
 ```java
 List<Advisor> candidateAdvisors = findCandidateAdvisors();
 List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
-		
 ```
 
 findCandidateAdvisors方法中做了下面这些事情：
