@@ -177,6 +177,8 @@ MySQL的优化器确实有“偷懒”的嫌疑，即使简单地把where id+1=1
 
 #### 唯一索引和普通索引底层的设计区别
 
+mysql在更新的时候，如果数据不在内存中，为了避免去更改内存，就会写进change buffer中。
+
 只有普通索引可以用到change buffer，所以在更新的时候，唯一索引会比较慢。因为唯一索引要判断是否冲突，需要把数据从磁盘中读取出来，而普通索引只需要写入change buffer.
 
 #### 聚簇索引和非聚簇索引区别？ 主键索引和二级索引了解吗？
@@ -335,7 +337,7 @@ call query_rewrite.flush_rewrite_rules();
 
 **MySQL选错了索引。**
 
-这时候，应急方案就是给这个语句加上force index。
+这时候，应急方案就是给这个语句加上force index。但是这样不是很好，需要重新部署项目，以后换数据库也不认识这个语法。
 
 同样地，使用查询重写功能，给原来的语句加上force index，也可以解决这个问题。
 
@@ -561,12 +563,6 @@ next key lock
 ```sql
 SELECT * FROM user WHERE username='admin' AND psw='password'
 ```
-
-链接：https://www.imooc.com/article/275869
-
-来源：慕课网
-
-本文首次发布于慕课网 ，转载请注明出处，谢谢合作
 
 但是恶意攻击者用奇怪用户名将你的 SQL 语句变成了如下形式：
 

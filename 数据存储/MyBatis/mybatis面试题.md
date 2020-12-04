@@ -4,7 +4,7 @@
 
 ## MyBatis中#和$符号的区别
 
-\#{} 实现的是sql语句的预处理参数、之后执行sql中用?号代替，使用时不需要关注数据类型，mybatis自动实现数据类型的转换，并 且可以防止sql注入
+\#{} 实现的是sql语句的预处理参数、之后执行sql中用?号代替，使用时不需要关注数据类型，mybatis自动实现数据类型的转换，并且可以防止sql注入
 
 ${} 实现是sql语句的直接拼接、不做数据类型转换。需要自行判断数据类型、不能防止sql注入
 
@@ -12,7 +12,7 @@ ${} 实现是sql语句的直接拼接、不做数据类型转换。需要自行�
 
 ### 一级缓存
 
-MyBatis在开启一个数据库会话时，会 创建一个新的SqlSession对象，SqlSession对象中会有一个新的Executor对象。Executor对象中持有一个新的PerpetualCache对象；当会话结束时，SqlSession对象及其内部的Executor对象还有PerpetualCache对象也一并释放掉。
+MyBatis在开启一个数据库会话时，会创建一个新的SqlSession对象，SqlSession对象中会有一个新的Executor对象。Executor对象中持有一个新的PerpetualCache对象；当会话结束时，SqlSession对象及其内部的Executor对象还有PerpetualCache对象也一并释放掉。
 
 SqlSession中执行了任何一个update操作(update()、delete()、insert()) ，都会清空PerpetualCache对象的数据。
 
@@ -74,10 +74,10 @@ SqlSession中执行了任何一个update操作(update()、delete()、insert()) �
   }
 ```
 
-　SqlSessionFactory层面上的二级缓存默认是不开启的，二级缓存的开席需要进行配置，实现二级缓存的时候，MyBatis要求返回的POJO必须是可序列化的。 也就是要求实现Serializable接口，配置方法很简单，只需要在映射XML文件配置就可以开启缓存了\<cache/>，如果我们配置了二级缓存就意味着：
+　SqlSessionFactory层面上的二级缓存默认是不开启的，二级缓存的开启需要进行配置，实现二级缓存的时候，MyBatis要求返回的POJO必须是可序列化的。 也就是要求实现Serializable接口，配置方法很简单，只需要在映射XML文件配置就可以开启缓存了\<cache/>，如果我们配置了二级缓存就意味着：
 
 - 映射语句文件中的所有select语句将会被缓存。
-- 映射语句文件中的所欲insert、update和delete语句会刷新缓存。
+- 映射语句文件中的所有insert、update和delete语句会刷新缓存。
 - 缓存会使用默认的Least Recently Used（LRU，最近最少使用的）算法来收回。
 - 根据时间表，比如No Flush Interval,（CNFI没有刷新间隔），缓存不会以任何时间顺序来刷新。
 - 缓存会存储列表集合或对象(无论查询方法返回什么)的1024个引用

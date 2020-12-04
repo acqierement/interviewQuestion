@@ -170,7 +170,7 @@ final V put(K key, int hash, V value, boolean onlyIfAbsent) {
 
 ```
 
-尝试获取锁失败的话，会去执行scanAndLockForPut。该方法会自旋去查找是否有相同的节点，没有的话，就返回创建的新节点。
+尝试获取锁失败的话，会去执行scanAndLockForPut。该方法会自旋保证拿到锁，并查找是否有相同的节点，没有的话，就返回创建的新节点。
 
 ### size()
 

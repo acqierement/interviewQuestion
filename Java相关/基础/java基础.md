@@ -267,7 +267,23 @@ Java 8 增加了函数式编程的支持，所以又增加了一类定义，即�
 
 从 Java 8 开始，interface 增加了对 default method 的支持，接口也可以有方法实现了。
 
-抽象类中可以有非抽象的方法。
+从java 8开始，接口里允许定义静态方法，格式：
+
+```
+public static 返回值类型  方法名称（参数列表）{方法体}；
+```
+
+java 9增加了对private default method的支持。
+
+```
+普通私有方法： private 返回值类型 方法名称（参数列表）{方法体}
+
+静态私有方法：private static 返回值类型 方法名称（参数列表）{方法体}
+```
+
+**抽象类**中可以有非抽象的方法。也可以不含抽象方法
+
+子类如果不是抽象类就必须重写所有抽象方法。
 
 **能不能用一个设计模式来说明**
 
@@ -315,7 +331,13 @@ Java 8 增加了函数式编程的支持，所以又增加了一类定义，即�
 
 锁可以是任意对象，所以任意对象调用方法一定定义在Object类中。
 
-## 基本数据类型，int的长度
+## 基本数据类型
+
+| boolean | byte | short | char | int  | long | float | double |
+| ------- | ---- | ----- | ---- | ---- | ---- | ----- | ------ |
+| 1       | 1    | 2     | 2    | 4    | 8    | 4     | 8      |
+
+单位是字节
 
 byte：一个字节（8位）（-128~127）（-2的7次方到2的7次方-1）
 
@@ -698,6 +720,32 @@ JDK9之前String底层使用char数组存储数据private final char value[]，J
 五、线程间的通信——管道
 
 六、方法Join的使用
+
+## 遍历所有文件
+
+```java
+import java.io.File;
+import java.io.FileFilter;
+ 
+public class FileText {
+	public static void main(String[] args) {
+		String path = "D:\\JAVA";		//要遍历的路径
+		File file = new File(path);		//获取其file对象
+		func(file);
+	}
+	
+	private static void func(File file){
+		File[] fs = file.listFiles();
+		for(File f:fs){
+			if(f.isDirectory())	//若是目录，则递归打印该目录下的文件
+				func(f);
+			if(f.isFile())		//若是文件，直接打印
+				System.out.println(f);
+		}
+	}
+}
+
+```
 
 
 

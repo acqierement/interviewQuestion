@@ -8,9 +8,9 @@ BeanFactory，以Factory结尾，表示它是一个工厂类(接口)， **它负
 
 ### FactoryBean
 
-**Spring提供了一个factory.FactoryBean的工厂类接口，用户可以通过实现该接口定制实例化Bean的逻辑。FactoryBean接口对于Spring框架来说占用重要的地位，Spring自身就提供了70多个FactoryBean的实现**。它们隐藏了实例化一些复杂Bean的细节，给上层应用带来了便利。从Spring3.0开始，FactoryBean开始支持泛型，即接口声明改为FactoryBean<T>的形式
+**Spring提供了一个factory.FactoryBean的工厂类接口，用户可以通过实现该接口定制实例化Bean的逻辑。FactoryBean接口对于Spring框架来说占用重要的地位，Spring自身就提供了70多个FactoryBean的实现**。它们隐藏了实例化一些复杂Bean的细节，给上层应用带来了便利。从Spring3.0开始，FactoryBean开始支持泛型，即接口声明改为FactoryBean\<T>的形式
 
-以Bean结尾，表示它是一个Bean，不同于普通Bean的是：它是实现了FactoryBean<T>接口的Bean，根据该Bean的ID从BeanFactory中获取的实际上是FactoryBean的getObject()返回的对象，而不是FactoryBean本身，如果要获取FactoryBean对象，请在id前面加一个&符号来获取。
+以Bean结尾，表示它是一个Bean，不同于普通Bean的是：它是实现了FactoryBean\<T>接口的Bean，根据该Bean的ID从BeanFactory中获取的实际上是FactoryBean的getObject()返回的对象，而不是FactoryBean本身，如果要获取FactoryBean对象，请在id前面加一个&符号来获取。
 
 @Component:组件.(作用在类上)
 Spring 中提供@Component 的三个衍生注解:(功能目前来讲是一致的) 
@@ -41,6 +41,32 @@ Spring 4.x全面支持Java 8.0，支持Lambda表达式的使用，提供了对@S
 Spring 4.x开始，Spring MVC基于Servlet 3.0 开发，并且为了方便Restful开发，引入了新的RestController注解器注解，同时还增加了一个AsyncRestTemplate支持Rest客户端的异步无阻塞请求。
 
 Spring5 的基准版本为8。支持响应式编程支持。增加函数式web框架，该框架引入了两个基本组件：HandlerFunction 和 RouterFunction。
+
+## @RestController注解
+
+@RestController注解，相当于@Controller+@ResponseBody两个注解的结合，返回json数据不需要在方法前面加@ResponseBody注解了，但使用@RestController这个注解，就不能返回jsp,html页面，视图解析器无法解析jsp,html页面
+
+## **@Scope有几种模式**
+
+**1.singleton单例模式,**
+
+　　全局有且仅有一个实例
+
+**2.prototype原型模式，**
+
+　　每次获取Bean的时候会有一个新的实例
+
+**3.request**　　
+
+​    request表示该针对每一次HTTP请求都会产生一个新的bean，同时该bean仅在当前HTTP request内有效，
+
+**4.session**　
+
+​     session作用域表示该针对每一次HTTP请求都会产生一个新的bean，同时该bean仅在当前HTTP session内有效
+
+**5.global session**
+
+​     global session作用域类似于标准的HTTP Session作用域，不过它仅仅在基于portlet的web应用中才有意义。Portlet规范定义了全局Session的概念，它被所有构成某个 portlet web应用的各种不同的portlet所共享。在global session作用域中定义的bean被限定于全局portlet Session的生命周期范围内。如果你在web中使用global session作用域来标识bean，那么web会自动当成session类型来使用。
 
 ## spring中bean的加载过程
 
@@ -381,3 +407,32 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.spring.study.
 
 ## SpringCloud 一套微服务的框架中间有什么部分你是比较熟悉的，详细介绍一下。
 
+## Spring MVC的工作流程
+
+Spring会默认为我们注册`RequestMappingHandlerMapping`等Bean定义。而`RequestMappingHandlerMapping`实现了`InitializingBean`接口,会执行他的afterPropertySet方法.
+
+```java
+	public void afterPropertiesSet() {  
+        initHandlerMethods();  
+    }  
+  
+    //Scan beans in the ApplicationContext, detect and register handler methods.  
+    protected void initHandlerMethods() {  
+        //扫描所有注册的Bean  
+        String[] beanNames = (this.detectHandlerMethodsInAncestorContexts ?  
+           BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(),   
+                Object.class) : getApplicationContext().getBeanNamesForType(Object.class));  
+        //遍历这些Bean，依次判断是否是处理器，并检测其HandlerMethod  
+        for (String beanName : beanNames) {  
+            if (isHandler(getApplicationContext().getType(beanName))){  
+                detectHandlerMethods(beanName);  
+            }  
+        }  
+        //这个方法是个空实现,不管他  
+        handlerMethodsInitialized(getHandlerMethods());  
+    }  
+```
+
+ 整个的检测过程大致这样：1）遍历Handler中的所有方法，找出其中被@RequestMapping注解标记的方法。2）然后遍历这些方法，生成RequestMappingInfo实例。3）将RequestMappingInfo实例以及处理器方法注册到缓存中。
+
+![img](spring面试题/1121080-20190509202147059-745656946.jpg)
