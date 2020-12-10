@@ -1,4 +1,4 @@
-Dubbo服务引入
+# Dubbo服务引入
 
 **ReferenceBean#getObject**
 
@@ -300,3 +300,14 @@ public <T> Invoker<T> protocolBindingRefer(Class<T> serviceType, URL url) throws
 一个完整的流程差不多是这样：
 
 ![](Dubbo服务引入/640.png)
+
+## 大体流程
+
+ ReferenceBean.getObject
+ init:收集各种配置，并将配置存储到 map 中
+ createProxy(map): 
+	1、根据map生成url。
+	2、根据url通过refprotocol.refer创建invoker
+		DubboProtocol 的 refer:创建invoker，并且会生成一个客户端
+		RegistryProtocol 的 refer：注册服务消费者，订阅providers、configurators、routers 等节点数据
+	3、将invoker生成代理类		

@@ -144,3 +144,19 @@ public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
 
 之后其实就是打开 Server ，RPC 肯定需要远程调用，这里我们用的是 NettyServer 来监听服务。
 
+## 大体流程
+
+触发时机：ServiceBean 的 onApplicationEvent
+doExport ：检查配置信息，调用doExportUrls
+doExportUrls:多协议多注册中心导出服务
+doExportUrlsFor1Protocol: 
+	1.组装 URL。将一些信息，比如版本、时间戳、方法名以及各种配置对象的字段信息放入到 map 中，map 中的	内容将作为 URL 的查询字符串。构建好 map 后，紧接着是获取上下文路径、主机名以及端口号等信息。最后	将 map 和主机名等数据传给 URL 构造方法创建 URL 对象。
+
+​	2.为服务提供类(ref)生成 Invoker
+
+​	3.导出 Dubbo 服务：服务导出分为导出到本地 (JVM)，和导出到远程
+RegistryProtocol 的 export ：包含了服务导出，注册，以及数据订阅等逻辑
+​	1、doLocalExport()导出服务：dubbo协议的export：生成serviceKey，作为唯一标识。2、创建Export,缓存起来。3、启动服务器，默认是netty
+​	2、注册服务register():第一步是获取注册中心实例，第二步是向注册中心注册服务。
+​		以 Zookeeper 为例，所谓的服务注册，本质上是将服务配置数据写入到 Zookeeper 的某个路径的节点下。
+
