@@ -126,7 +126,7 @@ private final ThreadLocal<Object> prototypesCurrentlyInCreation =      new Named
 
 ## 单例设置值循环依赖解决方案
 
-在doCreateBean方法中会判断是否需要提前暴露
+在doCreateBean方法中会判断是否需要提前暴露（这里是在实例化instance之后）
 
 ```java
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
@@ -188,3 +188,4 @@ Object sharedInstance = getSingleton(beanName);
 首先先从singletonObjects获取，如果拿到了，就说明已经存在了完整的单例bean了，如果没有获取到并且当前bean正在创建，则从earlySingletonObjects获取，如果没有获取到，再从singletonFactories获取singletonFactory去获取bean。这个singletonFactory是我们之前加入的，getObject方法实际是调用getEarlyBeanReference，得到我们之前暴露的bean实例。
 
 singletonObjects、earlySingletonObjects、singletonFactories就是我们所说的三级缓存，其中earlySingletonObjects和singletonFactories是互斥的
+

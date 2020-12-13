@@ -640,16 +640,9 @@ Spring提供了4种类型的AOP支持：
 - @AspectJ注解驱动的切面；
 - 注入式AspectJ切面（适用于Spring各版本）。
 
-Spring提供了4种类型的AOP支持：
-
-- 基于代理的经典Spring AOP；
-- 纯POJO切面；
-- @AspectJ注解驱动的切面；
-- 注入式AspectJ切面（适用于Spring各版本）。
-
 前三种都是Spring AOP实现的变体，Spring AOP构建在动态代理基础之上，因此，Spring对AOP的支持局限于方法拦截。
 
-![1590139690044](java基础/1590139690044.png)
+![1590139690044](java基础面试题/1590139690044.png)
 
 select s.* from score s RIGHT JOIN (select Max(score) score,`subject` from score GROUP BY `subject`) b on b.`subject` = s.`subject` and b.score = s.score
 

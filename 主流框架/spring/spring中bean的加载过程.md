@@ -38,6 +38,8 @@ mbd.overrideFrom(bd);
 
 ## 3.实例化bean
 
+实例化之前会调用resolveBeforeInstance()，这里会调用实例化的前置处理器
+
 实例化bean都会到这个方法。
 
 ```java
@@ -88,7 +90,7 @@ populateBean(beanName, mbd, instanceWrapper);
 
 然后才是填充属性
 
-```
+```java
 		PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
 
 		int resolvedAutowireMode = mbd.getResolvedAutowireMode();
@@ -114,6 +116,7 @@ populateBean(beanName, mbd, instanceWrapper);
 if (hasInstAwareBpps) {
     for (BeanPostProcessor bp : getBeanPostProcessors()) {
         if (bp instanceof InstantiationAwareBeanPostProcessor) {
+          	// @Autowire注解
             InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
             pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
             if (pvs == null) {

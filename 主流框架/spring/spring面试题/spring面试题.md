@@ -166,6 +166,12 @@ PROPAGATION_NESTED -- 理解Nested的关键是savepoint。他与PROPAGATION_REQU
 
 #### @Transactional实现原理
 
+https://blog.csdn.net/qq_20597727/article/details/84868035
+
+@Transactional的实现是基于aop的。spring会生成一个**BeanFactoryTransactionAttributeSourceAdvisor实例**，这个实例可以看做一个切点。
+
+aop会在`AopUtils#findAdvisorsThatCanApply`中判断切面是否适用当前bean。如果有@Transactional的注解就表示适用这个advisor，然后会开启一个事务来执行方法。等同于一个@Around
+
 #### spring事务传播行为怎么实现
 
 #### 事务的注意事项？

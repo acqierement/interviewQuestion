@@ -30,7 +30,7 @@ synchronize代码块比起修饰方法可以更精确的把需要的代码进行
 
 如果synchronize修饰的是静态方法，则获取的是这个类class的锁，等价于synchronize（Person.class),这个锁和对象锁不一样，彼此不会产生阻塞。
 
-
+## Lock
 
 Lock和synchronize作用类似，但是lock可以实现更多的功能。lock要自己显示地释放锁，所以因此使用Lock时需要在finally块中释放锁。
 

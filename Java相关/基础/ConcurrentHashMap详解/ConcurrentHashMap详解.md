@@ -415,7 +415,13 @@ public int size() {
 
 这里就是获取成员变量counterCells，遍历获取总数。
 
-其实，对于 CounterCell 的操作，是基于 java.util.concurrent.atomic.LongAdder 进行的，是一种 JVM 利用空间换取更高效率的方法，利用了Striped64内部的复杂逻辑。这个东西非常小众，大多数情况下，建议还是使用 AtomicLong，足以满足绝大部分应用的性能需求。
+其实，对于 CounterCell 的操作，是基于 java.util.concurrent.atomic.LongAdder 进行的，是一种 JVM 利用空间换取更高效率的方法，利用了Striped64内部的复杂逻辑。
+
+其实就是有个baseCount，如果没有竞争的情况，就加这个值，如果有竞争的情况，就把值放到cell数组里面。
+
+最后获取值的时候，就需要把baseCount的值加上所有cell的值
+
+> Atomic只竞争一个共享变量，longAdder是竞争多个变量，保证了高并发的效率
 
 ### 扩容
 
