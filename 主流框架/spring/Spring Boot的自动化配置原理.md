@@ -58,9 +58,178 @@ loadFactoryNames里面最后有这么一个语句：
 
 但是获取到配置后又是怎么跟spring进行整合的呢？
 
-## 应用配置
+## 配置解析
 
-前面说了启动过程，首先会创建ApplicationContext，具体是AnnotationConfigServletWebServerApplicationContext这个类。然后强转成AbstractApplicationContext类，调用refresh方法
+主要是通过ConfigurationClassPostProcessor这个类来对加了@Configuration注解的类进行解析
+
+```java
+public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
+		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
+	......
+}
+```
+
+这个类实现了BeanDefinitionRegistryPostProcessor，所以会调用其postProcessBeanDefinitionRegistry方法。具体调用地方是在refresh的invokeBeanFactoryPostProcessors()方法。
+
+```java
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+		......
+		processConfigBeanDefinitions(registry);
+	}
+```
+
+在这里面会判断BeanDefinition是否为配置类，如果是，则用解析类对其解析，其实就是ConfigurationClassParser.parse()方法
+
+在这个方法里面，会对@PropertySource、@ComponentScan、@Import、@ImportResource、@Bean等进行解析。我们这里只看一下@Import的解析。
+
+首先会先拿到该类及其父类所有的@Import引入的类。
+
+然后在processImports方法里，对其进行处理
+
+```java
+				for (SourceClass candidate : importCandidates) {
+					if (candidate.isAssignable(ImportSelector.class)) {
+						// Candidate class is an ImportSelector -> delegate to it to determine imports
+						Class<?> candidateClass = candidate.loadClass();
+						ImportSelector selector = ParserStrategyUtils.instantiateClass(candidateClass, ImportSelector.class,
+								this.environment, this.resourceLoader, this.registry);
+                        // 将select存起来
+						if (selector instanceof DeferredImportSelector) {
+							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
+						}
+                        ......
+					}
+                }
+```
+
+这里面其实就拿到了我们import进去的AutoConfigurationImportSelector类，可以看到使用了一个handler进行处理
+
+**ConfigurationClassParser.DeferredImportSelectorHandler.handle()**
+
+```java
+@Nullable
+private List<DeferredImportSelectorHolder> deferredImportSelectors = new ArrayList<>();
+
+public void handle(ConfigurationClass configClass, DeferredImportSelector importSelector) {
+   DeferredImportSelectorHolder holder = new DeferredImportSelectorHolder(configClass, importSelector);
+   if (this.deferredImportSelectors == null) {
+      DeferredImportSelectorGroupingHandler handler = new DeferredImportSelectorGroupingHandler();
+      handler.register(holder);
+      handler.processGroupImports();
+   }
+   else {
+      this.deferredImportSelectors.add(holder);
+   }
+}
+```
+
+把这个select放到了deferredImportSelectors这个list中。
+
+紧接着parse的后面，就调用了this.deferredImportSelectorHandler.process()方法。也就是刚把import解析出来，就调用其process方法。
+
+```java
+public void process() {
+   List<DeferredImportSelectorHolder> deferredImports = this.deferredImportSelectors;
+   this.deferredImportSelectors = null;
+   try {
+      if (deferredImports != null) {
+         DeferredImportSelectorGroupingHandler handler = new DeferredImportSelectorGroupingHandler();
+         deferredImports.sort(DEFERRED_IMPORT_COMPARATOR);
+         deferredImports.forEach(handler::register);
+         handler.processGroupImports();
+      }
+   }
+   finally {
+      this.deferredImportSelectors = new ArrayList<>();
+   }
+}
+```
+
+这里首先将每个select注册到DeferredImportSelectorGroupingHandler中。
+
+**ConfigurationClassParser.DeferredImportSelectorGroupingHandler#register**
+
+```java
+private final Map<Object, DeferredImportSelectorGrouping> groupings = new LinkedHashMap<>();
+
+private final Map<AnnotationMetadata, ConfigurationClass> configurationClasses = new HashMap<>();
+
+public void register(DeferredImportSelectorHolder deferredImport) {
+   Class<? extends Group> group = deferredImport.getImportSelector().getImportGroup();
+   DeferredImportSelectorGrouping grouping = this.groupings.computeIfAbsent(
+         (group != null ? group : deferredImport),
+         key -> new DeferredImportSelectorGrouping(createGroup(group)));
+   grouping.add(deferredImport);
+   this.configurationClasses.put(deferredImport.getConfigurationClass().getMetadata(),
+         deferredImport.getConfigurationClass());
+}
+```
+
+这里通过AutoConfigurationImportSelector#getImportGroup方法拿到了AutoConfigurationGroup这个内部类，包装成了DeferredImportSelectorGrouping，然后将其保存在groupings里面。
+
+紧接着调用ConfigurationClassParser.DeferredImportSelectorGroupingHandler#processGroupImports对其进行处理
+
+```java
+public void processGroupImports() {
+    for (DeferredImportSelectorGrouping grouping : this.groupings.values()) {
+        Predicate<String> exclusionFilter = grouping.getCandidateFilter();
+        grouping.getImports().forEach(entry -> {
+            ConfigurationClass configurationClass = this.configurationClasses.get(entry.getMetadata());
+            try {
+                processImports(configurationClass, asSourceClass(configurationClass, exclusionFilter),
+                               Collections.singleton(asSourceClass(entry.getImportClassName(), exclusionFilter)),
+                               exclusionFilter, false);
+            }
+        });
+    }
+}
+```
+
+grouping.getImports()会去调用group.process对每个select进行处理
+
+**AutoConfigurationImportSelector.AutoConfigurationGroup#process**
+
+```java
+		@Override
+		public void process(AnnotationMetadata annotationMetadata, DeferredImportSelector deferredImportSelector) {
+			AutoConfigurationEntry autoConfigurationEntry = ((AutoConfigurationImportSelector) deferredImportSelector)
+					.getAutoConfigurationEntry(annotationMetadata);
+			this.autoConfigurationEntries.add(autoConfigurationEntry);
+			for (String importClassName : autoConfigurationEntry.getConfigurations()) {
+				this.entries.putIfAbsent(importClassName, annotationMetadata);
+			}
+		}
+```
+
+**AutoConfigurationImportSelector#getAutoConfigurationEntry**
+
+```java
+	protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
+		if (!isEnabled(annotationMetadata)) {
+			return EMPTY_ENTRY;
+		}
+		AnnotationAttributes attributes = getAttributes(annotationMetadata);
+		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+		configurations = removeDuplicates(configurations);
+		Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+		checkExcludedClasses(configurations, exclusions);
+		configurations.removeAll(exclusions);
+		configurations = getConfigurationClassFilter().filter(configurations);
+		fireAutoConfigurationImportEvents(configurations, exclusions);
+		return new AutoConfigurationEntry(configurations, exclusions);
+	}
+```
+
+
+
+```
+DeferredImportSelectorGrouping
+```
+
+
+
+
 
 ```java
 ((AbstractApplicationContext) applicationContext).refresh();
